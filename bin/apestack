@@ -1,0 +1,48 @@
+#!/usr/bin/env ruby
+
+require 'spaceape-cfn'
+require 'gli'
+
+include GLI::App
+
+program_desc "Spaceape Cloudformation Tool"
+
+#pre do |global_opts, command, opts, args|
+#  $cfgen = Spaceape::Cloudformation::Generator.new(
+#end
+
+desc "Generate the scaffold of a stack, including cfndsl template and config files"
+long_desc "Valid template options are elb, elb_security_group, autoscaling_group, instance_security_group, record_set"
+command :scaffold do |c|
+  c.action do |globals, options, args|
+    help_now!("Wrong number of arguments for scaffold") if args.length == 0
+    s = Spaceape::Cloudformation::Generator.new(*args[0..1])
+    s.scaffold(options, *args[2..-1])
+  end
+end
+
+desc "Generate cloudformation JSON"
+long_desc "Generate JSON from CFNDSL template and config files."
+command :generate do |c|
+  c.action do |globals, options, args|
+    help_now!("Wrong number of arguments for generate") unless args.length == 2
+    s = Spaceape::Cloudformation::Generator.new(*args)
+    s.generate
+  end
+end
+
+desc "Upload JSON template to AWS"
+long_desc "Create a stack from pre-generated JSON template"
+command :build do |c|
+  c.flag [:policy]
+  c.switch [:y]
+  c.action do |globals, options, args|
+    help_now!("Wrong number of arguments for build") unless args.length == 2
+    s = Spaceape::Cloudformation::Uploader.new(*args)
+    s.create_stack(options)
+  end
+end
+
+
+
+exit run(ARGV)
