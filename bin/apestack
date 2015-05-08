@@ -7,10 +7,6 @@ include GLI::App
 
 program_desc "Spaceape Cloudformation Tool"
 
-#pre do |global_opts, command, opts, args|
-#  $cfgen = Spaceape::Cloudformation::Generator.new(
-#end
-
 desc "Generate the scaffold of a stack, including cfndsl template and config files"
 long_desc "Valid template options are elb, elb_security_group, autoscaling_group, instance_security_group, record_set"
 command :scaffold do |c|
@@ -35,6 +31,7 @@ desc "Upload JSON template to AWS"
 long_desc "Create a stack from pre-generated JSON template"
 command :build do |c|
   c.flag [:policy]
+  c.flag [:stackname], :required => true
   c.switch [:y]
   c.action do |globals, options, args|
     help_now!("Wrong number of arguments for build") unless args.length == 2

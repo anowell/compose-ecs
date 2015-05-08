@@ -1,3 +1,5 @@
+require 'json'
+
 module Spaceape
   module Cloudformation
     class Uploader < Spaceape::Cloudformation::Base
@@ -19,7 +21,7 @@ module Spaceape
       def create_stack(opts = {})
 	opts[:policy] ||= DEFAULT_LOCKED_POLICY
   	check_json(opts[:policy])
-	command = stack_command(:update, opts[:stackname], opts[:policy])
+	command = stack_command(:create, opts[:stackname], opts[:policy])
 	puts "Running:\n#{command}"
 	shell_out(command)
       end
@@ -32,7 +34,7 @@ module Spaceape
       end
 
       def stack_command(action, stack_name, policy)
-        command = "aws cloudformation #{action.to_s}-stack --stack-name #{stack_name} --template-body file://#{File.join(@service, @env, "#{@env}.json")} --capabilities CAPABILITY_IAM "
+        command = "aws cloudformation #{action.to_s}-stack --stack-name #{stack_name} --template-body file://#{File.join(@service, @env, "#{@service}.json")} --capabilities CAPABILITY_IAM "
 	case action
 	when :create
 	  command += "--stack-policy-body file://#{policy} --disable-rollback"
