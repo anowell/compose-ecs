@@ -40,6 +40,19 @@ command :build do |c|
   end
 end
 
+desc "Update JSON template on AWS"
+long_desc "Update a stack with a pre-generated JSON template"
+command :update do |c|
+  c.flag [:policy]
+  c.flag [:stackname], :required => true
+  c.switch [:y]
+  c.action do |globals, options, args|
+    help_now!("Wrong number of arguments for build") unless args.length == 2
+    s = Spaceape::Cloudformation::Uploader.new(*args)
+    s.update_stack(options)
+  end
+end
+
 
 
 exit run(ARGV)

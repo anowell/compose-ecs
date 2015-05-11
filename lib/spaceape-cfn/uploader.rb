@@ -27,6 +27,7 @@ module Spaceape
       end
 
       def update_stack(opts = {})
+	opts[:policy] ||= DEFAULT_LOCKED_POLICY
 	check_json(opts[:policy])
 	command = stack_command(:update, opts[:stackname], opts[:policy])
 	puts "Running:\n#{command}"
