@@ -46,7 +46,15 @@ module Spaceape
       def scaffold( opts = {}, *args )
         opts[:config_template] ||= CONFIG_TEMPLATE
         opts[:game] ||= GAME
-	components = [ :header, :params ].concat( args.map {|x| x.to_sym} )
+	parsed_args = []
+        if args.include?("as_group_with_elb")
+	  args.delete("as_group_with_elb")
+	  parsed_args = [ :elb, :elb_security_group, :autoscaling_group, :instance_security_group ].concat(args.map {|x| x.to_sym})
+ 	else
+	  parsed_args = args.map{|x| x.to_sym}
+	end
+
+	components = [ :header, :params ].concat(parsed_args)
  	components << :footer
 
         unless Dir.exists?(@output.dirname)
