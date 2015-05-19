@@ -14,6 +14,7 @@ module Spaceape
 		:elb => "skel/elb.tmpl",
 		:elb_security_group => "skel/elb-security-group.tmpl",
 		:autoscaling_group => "skel/autoscaling-group.tmpl",
+		:autoscaling_group_no_elb => "skel/autoscaling-group-no-elb.tmpl",
 		:instance_security_group => "skel/instance-security-group.tmpl",
 		:record_set => "skel/record-set.tmpl"
 	}
@@ -50,7 +51,10 @@ module Spaceape
         if args.include?("as_group_with_elb")
 	  args.delete("as_group_with_elb")
 	  parsed_args = [ :elb, :elb_security_group, :autoscaling_group, :instance_security_group ].concat(args.map {|x| x.to_sym})
- 	else
+	elsif args.include?("as_group_no_elb")
+	  args.delete("as_group_no_elb")
+	  parsed_args = [ :autoscaling_group_no_elb, :instance_security_group ].concat(args.map {|x| x.to_sym})
+	else
 	  parsed_args = args.map{|x| x.to_sym}
 	end
 
