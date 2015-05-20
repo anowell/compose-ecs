@@ -16,7 +16,9 @@ module Spaceape
 		:autoscaling_group => "skel/autoscaling-group.tmpl",
 		:autoscaling_group_no_elb => "skel/autoscaling-group-no-elb.tmpl",
 		:instance_security_group => "skel/instance-security-group.tmpl",
-		:record_set => "skel/record-set.tmpl"
+		:record_set => "skel/record-set.tmpl",
+		:mysql_rds => "skel/mysql-rds.tmpl",
+		:redis_elasticache => "skel/redis-elasticache.tmpl"
 	}
 
 
