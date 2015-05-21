@@ -6,25 +6,7 @@ module Spaceape
 
       GAME = "trex"
       CONFIG_TEMPLATE = "./skel/config.yml.tmpl"
-
-      @skeleton = {
-		:header => "skel/header.tmpl",
-		:params => "skel/params.tmpl",
-		:footer => "skel/footer.tmpl",
-		:elb => "skel/elb.tmpl",
-		:elb_security_group => "skel/elb-security-group.tmpl",
-		:autoscaling_group => "skel/autoscaling-group.tmpl",
-		:autoscaling_group_no_elb => "skel/autoscaling-group-no-elb.tmpl",
-		:instance_security_group => "skel/instance-security-group.tmpl",
-		:record_set => "skel/record-set.tmpl",
-		:mysql_rds => "skel/mysql-rds.tmpl",
-		:redis_elasticache => "skel/redis-elasticache.tmpl"
-	}
-
-
-      class << self
-        attr_accessor :skeleton
-      end
+      SKEL_DIRECTORY ="./skel"
 
       def initialize(service, env)
 	super
@@ -44,6 +26,10 @@ module Spaceape
         command = "bundle exec cfndsl #{@cfndsl} -y #{config_files.join(" -y ")} -r #{opts[:config_helper]} | json_pp >#{@output}"
 	puts "Generating output to #{@output}"
 	shell_out(command)
+      end
+
+      def symbol_to_template(symbol)
+	File.join(SKEL_DIRECTORY, symbol.to_s.tr('_','-') + '.tmpl')
       end
 
       def scaffold( opts = {}, *args )
@@ -68,12 +54,12 @@ module Spaceape
 	  FileUtils.mkdir_p(@output.dirname)
 	end
 
-        skel = Generator.skeleton
 	unless File.exists?(@cfndsl.to_s)
 	  puts "Generating CFNDSL skeleton"
 	  components.each do |template|
-	    raise "Invalid component specification: #{template}" unless skel[template]
-	    File.open(@cfndsl.to_s, 'a') {|f| f.write(File.read(skel[template])) }
+	    tmpl_file = symbol_to_template(template)
+	    raise "Invalid component specification: #{tmpl_file} does not exist." unless File.exists?(tmpl_file)
+	    File.open(@cfndsl.to_s, 'a') {|f| f.write(File.read(tmpl_file)) }
 	  end
         else
 	  puts "#{@cfndsl.to_s} already exists. Not re-generating,"
@@ -92,7 +78,7 @@ module Spaceape
 	  File.open(File.join(@service, @env, "#{@env}.yml"), 'w') {|f| f.write(YAML.dump(yaml)) }
 	end
 
-	FileUtils.cp('./config-helper.rb', File.join(@service, 'config-helper.rb'))   # Need a better way to do this
+	FileUtils.cp('./config-helper.rb', File.join(@service, 'config-helper.rb'))   
       end
 
     end

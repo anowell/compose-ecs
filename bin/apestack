@@ -8,7 +8,8 @@ include GLI::App
 program_desc "Spaceape Cloudformation Tool"
 
 desc "Generate the scaffold of a stack, including cfndsl template and config files"
-long_desc "Valid template options are elb, elb_security_group, autoscaling_group, instance_security_group, record_set"
+long_desc %{Templates can be found in the skel/ directory.
+For the common cases you can specify as_group_with_elb or as_group_no_elb}
 command :scaffold do |c|
   c.action do |globals, options, args|
     help_now!("Wrong number of arguments for scaffold") if args.length == 0
@@ -41,7 +42,7 @@ command :build do |c|
 end
 
 desc "Update JSON template on AWS"
-long_desc "Update a stack with a pre-generated JSON template"
+long_desc "Update a stack with a pre-generated JSON template. You'll probably want to specify a policy to override the default."
 command :update do |c|
   c.flag [:policy]
   c.flag [:stackname], :required => true
@@ -52,7 +53,5 @@ command :update do |c|
     s.update_stack(options)
   end
 end
-
-
 
 exit run(ARGV)
