@@ -11,6 +11,9 @@ desc "Generate the scaffold of a stack, including cfndsl template and config fil
 long_desc %{Templates can be found in the skel/ directory.
 For the common cases you can specify as_group_with_elb or as_group_no_elb}
 command :scaffold do |c|
+  c.flag [:game]
+  c.flag [:config_template]
+  c.flag 
   c.action do |globals, options, args|
     help_now!("Wrong number of arguments for scaffold") if args.length == 0
     s = Spaceape::Cloudformation::Generator.new(*args[0..1])

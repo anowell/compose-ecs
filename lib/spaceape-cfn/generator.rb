@@ -74,7 +74,8 @@ module Spaceape
 
 	unless File.exists?(File.join(@service, @env, "#{@env}.yml"))
 	  puts "Generating environment-specific config for #{@env}"
-	  yaml = { "ENVIRONMENT" => "#{GAME}-#{@env}", "INTERNAL_ELB_NAME" => "" }
+	  game_prefix = opts[:game] == "siege" ? "" : "#{opts[:game]}-"
+	  yaml = { "ENVIRONMENT" => "#{game_prefix}#{@env}", "INTERNAL_ELB_NAME" => "" }
 	  File.open(File.join(@service, @env, "#{@env}.yml"), 'w') {|f| f.write(YAML.dump(yaml)) }
 	end
 
