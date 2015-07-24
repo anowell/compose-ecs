@@ -9,17 +9,24 @@ module Spaceape
       security_group = []
       config_hash["services"].keys.each do |service|
         rule = {}
+	ext = nil
 	config_hash["services"][service]["ports"].each do |port|
-	  if port  =~ /(?<from>\d+).-.(?<to>\d+)/
+	  if port  =~ /(?<from>\d+).-.(?<to>\d+)(\s+(?<ext>EXTERNAL))?/
 	    from = $~[:from]
 	    to = $~[:to]
-   	  else
+ 	    ext = $~[:ext]
+   	  elsif port =~ /(?<from>\d+)(\s+(?<ext>EXTERNAL))?/
+	    from = to = $~[:from]
+	    ext = $~[:ext]
+          else
 	    from = to = port
 	  end
+
 	  rule["FromPort"] = from
 	  rule["ToPort"] = to
 	  rule["IpProtocol"] = 'tcp'
-          TRUSTED_IP_RANGES.each do |ip_range|
+	  ips = ext ? %w[ 0.0.0.0/0 ] : TRUSTED_IP_RANGES
+          ips.each do |ip_range|
 	    rule["CidrIp"] = ip_range
 	    security_group << rule.dup
 	  end

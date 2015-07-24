@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = "spaceape-cfn"
-  s.version     = '0.1.0'
+  s.version     = '0.1.1'
   s.authors     = ["Louis McCormack§"]
   s.email       = "ops@spaceapegames.com"
   s.homepage    = "http://www.spaceapegames.com"
