@@ -87,7 +87,7 @@ module Spaceape
 	unless File.exists?(File.join(@service, @env, "#{@env}.yml"))
 	  puts "Generating environment-specific config for #{@env}"
 	  game_prefix = opts[:game] == "siege" ? "" : "#{opts[:game]}-"
-	  yaml = { "ENVIRONMENT" => "#{game_prefix}#{@env}", "INTERNAL_ELB_NAME" => "" }
+	  yaml = { "ENVIRONMENT" => "#{game_prefix}#{@env}" }
 	  
 	  if opts[:autoparam]
             missing_params = missing_params - yaml.keys
