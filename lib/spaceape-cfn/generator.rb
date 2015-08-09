@@ -35,7 +35,9 @@ module Spaceape
       def scaffold( opts = {}, *args )
         opts[:config_template] ||= CONFIG_TEMPLATE
         opts[:game] ||= GAME
+	missing_params = []
 	parsed_args = []
+
         if args.include?("as_group_with_elb")
 	  args.delete("as_group_with_elb")
 	  parsed_args = [ :elb, :elb_security_group, :autoscaling_group  ].concat(args.map {|x| x.to_sym})
@@ -61,6 +63,11 @@ module Spaceape
 	    raise "Invalid component specification: #{tmpl_file} does not exist." unless File.exists?(tmpl_file)
 	    File.open(@cfndsl.to_s, 'a') {|f| f.write(File.read(tmpl_file)) }
 	  end
+
+	  if opts[:autoparam]
+	    # Read the CFN template and determine which params have yet to be defined
+	    missing_params = detect_missing_params(File.open(@cfndsl.to_s, 'r'))
+	  end
         else
 	  puts "#{@cfndsl.to_s} already exists. Not re-generating,"
 	end
@@ -69,6 +76,12 @@ module Spaceape
 	  puts "Generating service-wide config"
 	  yaml = YAML.load(File.open(opts[:config_template]))
 	  yaml["STACK_NAME"] = @service
+          
+	  if opts[:autoparam]
+	    missing_params = missing_params - yaml.keys
+            missing_params.each{ |param| yaml[param] = "" }
+          end
+
 	  File.open(File.join(@service,'config.yml'),'w') {|f| f.write(YAML.dump(yaml)) }
 	end
 
@@ -82,6 +95,26 @@ module Spaceape
 	FileUtils.cp('./config-helper.rb', File.join(@service, 'config-helper.rb'))   
       end
 
+      private
+
+      def detect_missing_params(skel)
+        references = []
+	resources = []
+
+	skel.each_line do |l|
+          references.concat( l.split(/Ref\s*\(/).map{ |ref| if ref.include? ")" then ref.split(")").first else [] end }) if l.match(/Ref\s*\(/)
+          resources.concat( l.split(/Resource\s*\(/).map{ |ref| if ref.include? ")" then ref.split(")").first else [] end }) if l.match(/Resource\s*\(/)
+        end
+
+        return (references - resources).map{ |r| underscore(r)}
+      end
+
+      def underscore(s)
+        s.gsub(/::/, '/').
+	gsub(/([A-Z]+)([A-Z][a-z])/,'\1_\2').
+	gsub(/([a-z\d])([A-Z])/,'\1_\2').
+        tr("-", "_").upcase
+      end
     end
   end
 end
