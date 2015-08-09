@@ -76,10 +76,9 @@ module Spaceape
 	  puts "Generating service-wide config"
 	  yaml = YAML.load(File.open(opts[:config_template]))
 	  yaml["STACK_NAME"] = @service
-          
+	  
 	  if opts[:autoparam]
-	    missing_params = missing_params - yaml.keys
-            missing_params.each{ |param| yaml[param] = "" }
+            missing_params = missing_params - yaml.keys
           end
 
 	  File.open(File.join(@service,'config.yml'),'w') {|f| f.write(YAML.dump(yaml)) }
@@ -89,6 +88,12 @@ module Spaceape
 	  puts "Generating environment-specific config for #{@env}"
 	  game_prefix = opts[:game] == "siege" ? "" : "#{opts[:game]}-"
 	  yaml = { "ENVIRONMENT" => "#{game_prefix}#{@env}", "INTERNAL_ELB_NAME" => "" }
+	  
+	  if opts[:autoparam]
+            missing_params = missing_params - yaml.keys
+            missing_params.each{ |param| yaml[param] = "" }
+          end
+
 	  File.open(File.join(@service, @env, "#{@env}.yml"), 'w') {|f| f.write(YAML.dump(yaml)) }
 	end
 
@@ -113,7 +118,7 @@ module Spaceape
         s.gsub(/::/, '/').
 	gsub(/([A-Z]+)([A-Z][a-z])/,'\1_\2').
 	gsub(/([a-z\d])([A-Z])/,'\1_\2').
-        tr("-", "_").upcase
+        tr("-", "_").upcase.delete("\"'")
       end
     end
   end
