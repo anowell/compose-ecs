@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = "spaceape-cfn"
-  s.version     = '0.1.2'
+  s.version     = '0.1.3'
   s.authors     = ["Louis McCormack§", "Josh McGhee"]
   s.email       = "ops@spaceapegames.com"
   s.homepage    = "http://www.spaceapegames.com"
@@ -18,4 +18,5 @@ Gem::Specification.new do |s|
   s.add_development_dependency "rspec"
 
   s.add_dependency 'cfndsl', '>= 0.1.11'
+  s.add_dependency 'spaceape-lib', '>= 0.4.6'
 end
