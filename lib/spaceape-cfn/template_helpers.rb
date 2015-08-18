@@ -5,7 +5,9 @@ module Spaceape
     module TemplateHelpers
 
     TRUSTED_IP_RANGES = %w[ 10.0.0.0/8 192.168.128.0/21 ]
+
     def self.build_security_group(config_hash)
+      config_hash["TRUSTED_IP_RANGES"] ||= TRUSTED_IP_RANGES
       security_group = []
       config_hash["services"].keys.each do |service|
         rule = {}
@@ -25,7 +27,7 @@ module Spaceape
 	  rule["FromPort"] = from
 	  rule["ToPort"] = to
 	  rule["IpProtocol"] = 'tcp'
-	  ips = ext ? %w[ 0.0.0.0/0 ] : TRUSTED_IP_RANGES
+	  ips = ext ? %w[ 0.0.0.0/0 ] : config_hash["TRUSTED_IP_RANGES"] 
           ips.each do |ip_range|
 	    rule["CidrIp"] = ip_range
 	    security_group << rule.dup
