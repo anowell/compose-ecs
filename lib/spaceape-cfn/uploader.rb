@@ -5,10 +5,12 @@ module Spaceape
     class Uploader < Spaceape::Cloudformation::Base
       DEFAULT_LOCKED_POLICY = "policies/locked.json"
       DEFAULT_UNLOCKED_POLICY = "policies/unlock-all.json"
+      AWS_CONFIG = '~/.aws/config'
 
-      def initialize(service, env)
+      def initialize(service, env, aws_config=AWS_CONFIG)
 	@service = service
 	@env = env
+	@aws_config = aws_config
 	check_json(File.join(@service, @env, "#{@service}.json"))
       end
 
@@ -21,28 +23,36 @@ module Spaceape
       def create_stack(opts = {})
 	opts[:policy] ||= DEFAULT_LOCKED_POLICY
   	check_json(opts[:policy])
-	command = stack_command(:create, opts[:stackname], opts[:policy])
-	puts "Running:\n#{command}"
-	shell_out(command)
+	stack_command(:create, opts[:stackname], opts[:policy])
       end
 
       def update_stack(opts = {})
 	opts[:policy] ||= DEFAULT_LOCKED_POLICY
 	check_json(opts[:policy])
-	command = stack_command(:update, opts[:stackname], opts[:policy])
-	puts "Running:\n#{command}"
-        shell_out(command)
+	stack_command(:update, opts[:stackname], opts[:policy])
       end
 
       def stack_command(action, stack_name, policy)
-        command = "aws cloudformation #{action.to_s}-stack --stack-name #{stack_name} --template-body file://#{File.join(@service, @env, "#{@service}.json")} --capabilities CAPABILITY_IAM "
+        opts = { :stack_name => stack_name,
+		 :template_body => File.open(File.join(@service, @env, "#{@service}.json")).read,
+		 :disable_rollback => true,
+		 :capabilities => [ 'CAPABILITY_IAM' ]
+	       }
+
 	case action
 	when :create
-	  command += "--stack-policy-body file://#{policy} --disable-rollback"
+ 	  opts[:stack_policy_body] = File.open(policy).read
+   	  msg = "Creating "
+	  method = :create_stack
 	when :update
-	  command += "--stack-policy-during-update-body file://#{policy}"
+ 	  opts[:stack_policy_during_update_body] = File.open(policy).read
+   	  msg = "Updating "
+	  method = :update_stack
 	end
-	return command
+
+	msg += "#{stack_name} using template at #{File.join(@service, @env, "#{@service}.json")} with policy #{policy}"
+	cfn = setup_amazon('CloudFormation::Client', @aws_config)  
+	cfn.method(method).call(opts)
       end
     end
   end
