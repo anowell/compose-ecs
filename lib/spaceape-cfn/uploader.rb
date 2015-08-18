@@ -1,8 +1,11 @@
 require 'json'
+require 'spaceape-lib'
 
 module Spaceape
   module Cloudformation
     class Uploader < Spaceape::Cloudformation::Base
+      include Spaceape::AWS
+
       DEFAULT_LOCKED_POLICY = "policies/locked.json"
       DEFAULT_UNLOCKED_POLICY = "policies/unlock-all.json"
       AWS_CONFIG = '~/.aws/config'
@@ -35,13 +38,13 @@ module Spaceape
       def stack_command(action, stack_name, policy)
         opts = { :stack_name => stack_name,
 		 :template_body => File.open(File.join(@service, @env, "#{@service}.json")).read,
-		 :disable_rollback => true,
 		 :capabilities => [ 'CAPABILITY_IAM' ]
 	       }
 
 	case action
 	when :create
  	  opts[:stack_policy_body] = File.open(policy).read
+	  opts[:disable_rollback] = true
    	  msg = "Creating "
 	  method = :create_stack
 	when :update
@@ -50,7 +53,7 @@ module Spaceape
 	  method = :update_stack
 	end
 
-	msg += "#{stack_name} using template at #{File.join(@service, @env, "#{@service}.json")} with policy #{policy}"
+	puts msg + "#{stack_name} using template at #{File.join(@service, @env, "#{@service}.json")} with policy #{policy}"
 	cfn = setup_amazon('CloudFormation::Client', @aws_config)  
 	cfn.method(method).call(opts)
       end
