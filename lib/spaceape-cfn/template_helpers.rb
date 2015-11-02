@@ -4,7 +4,7 @@ module Spaceape
   module Cloudformation
     module TemplateHelpers
 
-    TRUSTED_IP_RANGES = %w[ 10.0.0.0/8 192.168.128.0/21 ]
+    TRUSTED_IP_RANGES = %w[ 10.0.0.0/8 192.168.200.0/21 ]
 
     def self.build_security_group(config_hash)
       config_hash["TRUSTED_IP_RANGES"] ||= TRUSTED_IP_RANGES
