@@ -16,19 +16,30 @@ module Spaceape
       end
 
       def config_files
-        [ File.join(service,'config.yml'), File.join(service, env,  "#{env}.yml") ].select {|f| File.exists?(f)}
+        @config_files || [ File.join(service,'config.yml'), File.join(service, env,  "#{env}.yml") ].select {|f| File.exists?(f)}
+      end
+
+      def parsed_config
+        # Merge attributes, assumes config_files is in order of least-specific --> most-specific
+        attr = YAML.load(File.open(config_files.first))
+        config_files[1..-1].each do |f|
+          attr.merge!(YAML.load(File.open(f)))
+        end
+        return attr
       end
 
       def generate( opts = {} )
         raise "No cfndsl template found at #{@cfndsl}" unless File.exists?(@cfndsl.to_s)
 	      raise "No directory found at #{@output.dirname}" unless Dir.exists?(@output.dirname)
       	opts[:config_helper] ||= File.join(@service, '/config-helper.rb')
-        command = "bundle exec cfndsl #{@cfndsl} -y #{config_files.join(" -y ")} -r #{opts[:config_helper]} >/tmp/.#{@output.basename}.tmp"
+        File.open("/tmp/.#{@output.basename}.attrs.tmp",'w') { |f| f.write(YAML.dump(parsed_config)); f.close }
+        command = "bundle exec cfndsl #{@cfndsl} -y /tmp/.#{@output.basename}.attrs.tmp -r #{opts[:config_helper]} >/tmp/.#{@output.basename}.tmp"
       	puts "Generating output to #{@output}"
       	shell_out(command)
         json_output = JSON.pretty_generate(JSON.parse(File.open("/tmp/.#{@output.basename}.tmp", 'r').read))
         File.open(@output, 'w').write(json_output)
         File.unlink("/tmp/.#{@output.basename}.tmp") rescue ""
+        File.unlink("/tmp/.#{@output.basename}.attrs.tmp") rescue ""
       end
 
       def symbol_to_template(symbol)
