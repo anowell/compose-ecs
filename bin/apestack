@@ -17,7 +17,7 @@ switch [:nobogcheck], :default_value => false
 pre do |globals, command, options, args|
   unless globals[:nobogcheck] == true 
     profile = %x{bog}.chomp
-    if Pathname.pwd.to_s.match(%r{/cloudformation/#{profile}/}) == nil
+    if Pathname.pwd.to_s.match(%r{/cloudformation/#{profile}}) == nil
       raise "Bog profile is #{profile} yet you don't appear to be in the same Cloudformation directory. Pass --nobogcheck (before all other args) to override"
     end
   end
