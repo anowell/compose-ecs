@@ -13,6 +13,7 @@ long_desc %{Templates can be found in the skel/ directory.
 For the common cases you can specify as_group_with_elb or as_group_no_elb}
 
 switch [:nobogcheck], :default_value => false
+flag [:region], :default_value => "us-east-1"
 
 pre do |globals, command, options, args|
   unless globals[:nobogcheck] == true 
