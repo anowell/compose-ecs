@@ -27,12 +27,13 @@ end
 
 command :scaffold do |c|
   c.flag [:game]
-  c.flag [:config_template]
+  c.flag [:config_template, 'config-template']
   c.switch [:autoparam]
   c.flag 
   c.action do |globals, options, args|
     help_now!("Wrong number of arguments for scaffold") if args.length == 0
-    s = Spaceape::Cloudformation::Generator.new(*args[0..1])
+    klass = args[0] == "ecs" ? Spaceape::Cloudformation::EcsGenerator : Spaceape::Cloudformation::Generator
+    s = klass.new(*args[0..1])
     s.scaffold(options, *args[2..-1])
   end
 end
@@ -42,7 +43,8 @@ long_desc "Generate JSON from CFNDSL template and config files."
 command :generate do |c|
   c.action do |globals, options, args|
     help_now!("Wrong number of arguments for generate") unless args.length == 2
-    s = Spaceape::Cloudformation::Generator.new(*args)
+    klass = args[0] == "ecs" ? Spaceape::Cloudformation::EcsGenerator : Spaceape::Cloudformation::Generator
+    s = klass.new(*args)
     s.generate
   end
 end
@@ -51,11 +53,14 @@ desc "Upload JSON template to AWS"
 long_desc "Create a stack from pre-generated JSON template"
 command :build do |c|
   c.flag [:policy]
-  c.flag [:stackname], :required => true
+  c.flag [:stackname] 
+  c.flag [:revision] 
   c.switch [:y]
+  c.switch [:no_create_taskdef, 'no-create-taskdef'] 
   c.action do |globals, options, args|
     help_now!("Wrong number of arguments for build") unless args.length == 2
-    s = Spaceape::Cloudformation::Uploader.new(*args)
+    klass = args[0] == "ecs" ? Spaceape::Cloudformation::EcsUploader : Spaceape::Cloudformation::Uploader
+    s = klass.new(*args)
     s.create_stack(options)
   end
 end
@@ -64,11 +69,14 @@ desc "Update JSON template on AWS"
 long_desc "Update a stack with a pre-generated JSON template. You'll probably want to specify a policy to override the default."
 command :update do |c|
   c.flag [:policy]
-  c.flag [:stackname], :required => true
+  c.flag [:stackname]
+  c.flag [:revision] 
   c.switch [:y]
+  c.switch [:task_definition, 'taskdef-only']
   c.action do |globals, options, args|
     help_now!("Wrong number of arguments for build") unless args.length == 2
-    s = Spaceape::Cloudformation::Uploader.new(*args)
+    klass = args[0] == "ecs" ? Spaceape::Cloudformation::EcsUploader : Spaceape::Cloudformation::Uploader
+    s = klass.new(*args)
     s.update_stack(options)
   end
 end

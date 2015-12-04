@@ -8,9 +8,10 @@ module Spaceape
 
       def shell_out(cmd)
         resp = %x[ #{cmd} ]
-	unless $?.success?
-	  raise "Error running #{cmd} : #{resp}"
-	end
+        unless $?.success?
+          raise "Error running #{cmd} : #{resp}"
+      	end
+        return resp
       end
     end
   end

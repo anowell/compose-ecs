@@ -1,3 +1,5 @@
 require 'spaceape-cfn/base'
 require 'spaceape-cfn/generator'
+require 'spaceape-cfn/ecs-generator'
 require 'spaceape-cfn/uploader'
+require 'spaceape-cfn/ecs-uploader'
