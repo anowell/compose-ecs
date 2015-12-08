@@ -18,5 +18,5 @@ Gem::Specification.new do |s|
   s.add_development_dependency "rspec"
 
   s.add_dependency 'cfndsl', '>= 0.1.11'
-  s.add_dependency 'spaceape-lib', '>= 0.4.6'
+  s.add_dependency 'spaceape-lib', '>= 0.4.10'
 end
