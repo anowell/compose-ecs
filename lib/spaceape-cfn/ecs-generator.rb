@@ -3,12 +3,13 @@ module Spaceape
     class EcsGenerator < Spaceape::Cloudformation::Base
       attr_accessor :service
 
-      CONFIG_TEMPLATE = "./skel/ecs-config.yml.tmpl"
+      CONFIG_TEMPLATE = "ecs-config.yml.tmpl"
       SKEL_DIRECTORY ="./skel"
       CLUSTER_NAME = "default"
 
-      def initialize(_, service)
+      def initialize(_, service, region='us-east-1')
         @service = service
+        @region = region
       	@cfndsl = Pathname(File.join("ecs", @service, "#{@service}.cfndsl"))
       	json_out = "#{@service}.json"
       	@output = Pathname(File.join("ecs", @service, json_out))
@@ -31,10 +32,6 @@ module Spaceape
         File.unlink("/tmp/.#{@output.basename}.tmp") rescue ""
       end
 
-      def symbol_to_template(symbol)
-      	File.join(SKEL_DIRECTORY, symbol.to_s.tr('_','-') + '.tmpl')
-      end
-
       def scaffold( opts = {}, *args )
         opts[:config_template] ||= CONFIG_TEMPLATE
         opts[:cluster_name] ||= CLUSTER_NAME
@@ -43,7 +40,7 @@ module Spaceape
           parsed_args = [ :elb_params, :ecs_service, :elb, :elb_security_group ] + args.map(&:to_sym)
         else
           opts[:config_template] = "./skel/ecs-config-no-elb.yml.tmpl"
-          parsed_args = [:ecs_service_no_elb] + args.delete("no_elb").map(&:to_sym)
+          parsed_args = [:ecs_service_no_elb] + args.reject{|x| x == "no_elb"}.map(&:to_sym)
         end
 
       	components = [ :header ].concat(parsed_args)
@@ -58,7 +55,6 @@ module Spaceape
       	  puts "Generating CFNDSL skeleton"
       	  components.each do |template|
 	          tmpl_file = symbol_to_template(template)
-      	    raise "Invalid component specification: #{tmpl_file} does not exist." unless File.exists?(tmpl_file)
 	          File.open(@cfndsl.to_s, 'a') {|f| f.write(File.read(tmpl_file)) }
 	        end
         else
@@ -67,7 +63,7 @@ module Spaceape
 
       	unless File.exists?(File.join("ecs", @service, 'config.yml'))
       	  puts "Generating service config file"
-      	  yaml = YAML.load(File.open(opts[:config_template]))
+          yaml = parse_config_yaml(opts[:config_template])
       	  yaml["SERVICE_NAME"] = @service
       	  yaml["CLUSTER_NAME"] = opts[:cluster_name]
 	        File.open(File.join("ecs", @service,'config.yml'),'w') {|f| f.write(YAML.dump(yaml)) }

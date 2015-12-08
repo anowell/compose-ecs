@@ -3,12 +3,13 @@ module Spaceape
     class Generator < Spaceape::Cloudformation::Base
       attr_accessor :service
       attr_accessor :env
+      attr_accessor :region
 
       GAME = "trex"
-      CONFIG_TEMPLATE = "./skel/config.yml.tmpl"
+      CONFIG_TEMPLATE = "config.yml.tmpl"
       SKEL_DIRECTORY ="./skel"
 
-      def initialize(service, env)
+      def initialize(service, env, region='us-east-1')
         super
       	@cfndsl = Pathname(File.join(@service, "#{@service}.cfndsl"))
       	json_out = "#{@service}.json"
@@ -42,10 +43,6 @@ module Spaceape
         File.unlink("/tmp/.#{@output.basename}.attrs.tmp") rescue ""
       end
 
-      def symbol_to_template(symbol)
-      	File.join(SKEL_DIRECTORY, symbol.to_s.tr('_','-') + '.tmpl')
-      end
-
       def scaffold( opts = {}, *args )
         opts[:config_template] ||= CONFIG_TEMPLATE
         opts[:game] ||= GAME
@@ -74,7 +71,6 @@ module Spaceape
       	  puts "Generating CFNDSL skeleton"
       	  components.each do |template|
 	          tmpl_file = symbol_to_template(template)
-      	    raise "Invalid component specification: #{tmpl_file} does not exist." unless File.exists?(tmpl_file)
 	          File.open(@cfndsl.to_s, 'a') {|f| f.write(File.read(tmpl_file)) }
 	        end
 
@@ -88,8 +84,8 @@ module Spaceape
 
       	unless File.exists?(File.join(@service,'config.yml'))
       	  puts "Generating service-wide config"
-      	  yaml = YAML.load(File.open(opts[:config_template]))
-      	  yaml["STACK_NAME"] = @service
+          yaml = parse_config_yaml(opts[:config_template])
+          yaml["STACK_NAME"] = @service
 	  
       	  if opts[:autoparam]
             missing_params = missing_params - yaml.keys

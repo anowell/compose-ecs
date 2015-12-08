@@ -10,10 +10,11 @@ module Spaceape
       DEFAULT_UNLOCKED_POLICY = "policies/unlock-all.json"
       AWS_CONFIG = '~/.aws/config'
 
-      def initialize(_, service, aws_config=AWS_CONFIG)
+      def initialize(_, service, region='us-east-1', aws_config=AWS_CONFIG)
         @service = service
         @stack_name = "ecs-#{service}"
         @aws_config = aws_config
+        @region = region
         check_json(File.join("ecs", @service, "#{@service}.json"))
         check_json(File.join("ecs", @service, "task-definition.json")) if File.exists?(File.join("ecs", @service, "volumes.json"))
         check_json(File.join("ecs", @service, "volumes.json")) if File.exists?(File.join("ecs", @service, "volumes.json"))
@@ -30,51 +31,70 @@ module Spaceape
         cmd += " --volumes file://#{File.join("ecs", @service, "volumes.json")}" if File.exists?(File.join("ecs", @service, "volumes.json"))
         puts "Running command: #{cmd}"
         shell_out(cmd)
-        puts "Created task definition #{@service}:#{get_latest_revision}"
+        puts "Created task definition #{@service}:#{get_latest_revision_stripped}"
       end
 
       def update_taskdef_in_template(revision)
-        puts "Updating #{File.join("ecs", @service, "#{@service}.json")} with task definition #{@service}:#{revision}"
-        cmd = "sed -E -i '' -e s/#{@service}:[0-9]+/#{@service}:#{revision}/ #{File.join("ecs", @service, "#{@service}.json")}"
+        puts "Updating #{File.join("ecs", @service, "#{@service}.json")} with task definition #{revision}"
+        regex = "arn:aws:ecs:.*:.*:task-definition/#{@service}:[0-9]+"
+        cmd = "sed -E -i '' -e \'s|#{regex}|#{revision}|\' #{File.join("ecs", @service, "#{@service}.json")}"
         shell_out(cmd)
-        cmd = "sed -i '' -e s/__TASKDEF__/#{@service}:#{revision}/ #{File.join("ecs", @service, "#{@service}.json")}"
+        cmd = "sed -i '' -e \'s|__TASKDEF__|#{revision}|\' #{File.join("ecs", @service, "#{@service}.json")}"
         shell_out(cmd)
       end
 
       def get_latest_revision
         @get_latest_revision ||= lambda { 
         cmd = "aws ecs list-task-definitions --family-prefix #{@service}"
-        res = JSON.parse(shell_out(cmd), symbolize_names: true)
-        rev = res[:taskDefinitionArns].last.split(/:/).last
-        puts "Found #{@service}:#{rev}"
+        rev = JSON.parse(shell_out(cmd), symbolize_names: true)[:taskDefinitionArns].last
+        puts "Found #{rev}"
         return rev
         }.call
+      end
+
+      def get_latest_revision_stripped
+        get_latest_revision.split(/:/).last
+      end
+
+      def get_specific_revision(revision)
+        cmd = "aws ecs list-task-definitions --family-prefix #{@service}"
+        rev = JSON.parse(shell_out(cmd), symbolize_names: true)[:taskDefinitionArns].select{|x| x =~ /#{@service}:#{revision}$/}
+        raise "No revision #{revision} found for #{@service}" unless rev.length == 1
+        puts "Found #{rev[0]}"
+        return rev[0]
+      end
+
+      def set_revision(revision)
+        unless revision.nil?
+          return get_specific_revision(revision) 
+        else
+          return get_latest_revision
+        end
       end
 
       def create_stack(opts = {})
         opts[:policy] ||= DEFAULT_LOCKED_POLICY
         check_json(opts[:policy])
-        opts[:no_create_taskdef] ||= false
+        opts[:no_taskdef] ||= false
         # Create the task definition before the stack itself
-        unless opts[:no_create_taskdef] or opts[:revision]
+        unless opts[:no_taskdef] or opts[:revision]
           update_task_definition
         end
-        opts[:revision] ||= get_latest_revision
-        update_taskdef_in_template(opts[:revision])
+        update_taskdef_in_template(set_revision(opts[:revision]))
         stack_command(:create, opts[:policy])
       end
 
       def update_stack(opts = {})
         opts[:policy] ||= DEFAULT_LOCKED_POLICY
         check_json(opts[:policy])
-        opts[:task_definition] ||= false
+        opts[:no_taskdef] ||= false
         # Update the task definition if told to do so
-        if opts[:task_definition]
+        if opts[:taskdef_only]
           puts "Updating task definition only."
           update_task_definition
         else
-          opts[:revision] ||= get_latest_revision
-          update_taskdef_in_template(opts[:revision])
+          update_task_definition unless opts[:no_taskdef] or opts[:revision]
+          update_taskdef_in_template(set_revision(opts[:revision])) 
           stack_command(:update, opts[:policy])
         end
       end
@@ -98,7 +118,7 @@ module Spaceape
         end
 
         puts msg + "#{@stack_name} using template at #{File.join("ecs", @service, "#{@service}.json")} with policy #{policy}"
-        cfn = setup_amazon('CloudFormation::Client', @aws_config)  
+        cfn = setup_amazon('CloudFormation::Client', @aws_config, @region)  
         cfn.method(method).call(opts)
       end
 

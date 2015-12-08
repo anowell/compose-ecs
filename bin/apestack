@@ -33,7 +33,7 @@ command :scaffold do |c|
   c.action do |globals, options, args|
     help_now!("Wrong number of arguments for scaffold") if args.length == 0
     klass = args[0] == "ecs" ? Spaceape::Cloudformation::EcsGenerator : Spaceape::Cloudformation::Generator
-    s = klass.new(*args[0..1])
+    s = klass.new(*args[0..1], globals[:region])
     s.scaffold(options, *args[2..-1])
   end
 end
@@ -56,9 +56,10 @@ command :build do |c|
   c.flag [:stackname] 
   c.flag [:revision] 
   c.switch [:y]
-  c.switch [:no_create_taskdef, 'no-create-taskdef'] 
+  c.switch [:no_taskdef, 'no-taskdef'] 
   c.action do |globals, options, args|
     help_now!("Wrong number of arguments for build") unless args.length == 2
+    args << globals[:region]
     klass = args[0] == "ecs" ? Spaceape::Cloudformation::EcsUploader : Spaceape::Cloudformation::Uploader
     s = klass.new(*args)
     s.create_stack(options)
@@ -72,9 +73,11 @@ command :update do |c|
   c.flag [:stackname]
   c.flag [:revision] 
   c.switch [:y]
-  c.switch [:task_definition, 'taskdef-only']
+  c.switch [:no_taskdef, 'no-taskdef']
+  c.switch [:taskdef_only, 'taskdef-only']
   c.action do |globals, options, args|
     help_now!("Wrong number of arguments for build") unless args.length == 2
+    args << globals[:region]
     klass = args[0] == "ecs" ? Spaceape::Cloudformation::EcsUploader : Spaceape::Cloudformation::Uploader
     s = klass.new(*args)
     s.update_stack(options)

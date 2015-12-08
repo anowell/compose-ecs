@@ -10,10 +10,11 @@ module Spaceape
       DEFAULT_UNLOCKED_POLICY = "policies/unlock-all.json"
       AWS_CONFIG = '~/.aws/config'
 
-      def initialize(service, env, aws_config=AWS_CONFIG)
+      def initialize(service, env, region='us-east-1', aws_config=AWS_CONFIG)
         @service = service
         @env = env
         @aws_config = aws_config
+        @region = region
         check_json(File.join(@service, @env, "#{@service}.json"))
       end
 
@@ -54,7 +55,7 @@ module Spaceape
         end
 
         puts msg + "#{stack_name} using template at #{File.join(@service, @env, "#{@service}.json")} with policy #{policy}"
-        cfn = setup_amazon('CloudFormation::Client', @aws_config)  
+        cfn = setup_amazon('CloudFormation::Client', @aws_config, @region)  
         cfn.method(method).call(opts)
       end
 
