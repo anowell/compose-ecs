@@ -1,0 +1,24 @@
+#! /usr/bin/env ruby
+require 'compose-ecs'
+require 'gli'
+
+include GLI::App
+
+program_desc "Convert Docker Compose files into AWS ECS Task Definitons"
+
+desc "Convert Docker Compose files into AWS ECS Task Definitons"
+long_desc %{Convert Docker Compose files into AWS ECS Task Definitons. Usage: compose-ecs convert <family> <compose_file_path>}
+command :convert do |c|
+  c.action do |globals, options, args|
+    help_now!("Wrong number of arguments for convert, expecting 'convert <family> <compose_file_path>'") if args.length != 2
+
+    family = args[0]
+    compose_file = File.open(args[1], 'r')
+    compose_string = compose_file.read
+
+    c = ComposeECS.new(family, compose_string)
+    puts c.to_s
+  end
+end
+
+exit run(ARGV)
