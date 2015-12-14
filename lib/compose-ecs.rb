@@ -170,10 +170,18 @@ class ComposeECS
         end
       end
     end
-    @output = JSON.pretty_generate(ecs_def.build)
+    @output = ecs_def.build
   end
 
   def to_s
-    return @output
+    return JSON.pretty_generate(@output)
+  end
+
+  def to_json
+    @output.to_json
+  end
+
+  def to_hash
+    @output
   end
 end
