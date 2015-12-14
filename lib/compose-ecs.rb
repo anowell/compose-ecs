@@ -1,8 +1,7 @@
 require 'yaml'
 require 'json'
 
-module ComposeECS
-  class ECSDefinition
+class ECSDefinition
 
   attr_accessor :container_definitions, :volume_definitions
 

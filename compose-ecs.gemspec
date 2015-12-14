@@ -11,6 +11,12 @@ Gem::Specification.new do |s|
     'http://rubygems.org/gems/ecs-compose'
   s.license       = 'MIT'
 
-  s.add_runtime_dependency 'json'
-  s.add_runtime_dependency 'yaml'
+  s.add_development_dependency 'rake'
+
+  s.add_runtime_dependency 'json', '~> 1.8.3'
+  s.add_runtime_dependency 'yaml', '~> 4.2.2'
+  s.add_runtime_dependency 'gli', '~> 2.13.2'
+
+  s.bindir = 'bin'
+  s.executables = ['compose-ecs']
 end
