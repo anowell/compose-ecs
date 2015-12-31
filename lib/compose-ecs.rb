@@ -175,12 +175,16 @@ class ComposeECS
     @output = ecs_def.build
   end
 
-  def volumes
-    return JSON.pretty_generate({@output[0]['family'], @output[0]['containerDefinitions']})
+  def no_volumes
+    return JSON.pretty_generate({ 'family' => @output[0]['family'], 'containerDefinitions' => @output[0]['containerDefinitions']})
   end
 
   def volumes
-    return JSON.pretty_generate({@output[0]['volumes']})
+    if @output[0].keys.include? 'volumes'
+      return JSON.pretty_generate({'volumes' => @output[0]['volumes']})
+    else
+      return ""
+    end
   end
 
   def to_s
