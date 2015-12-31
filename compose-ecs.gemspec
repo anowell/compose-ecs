@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = 'compose-ecs'
-  s.version     = '0.0.2'
+  s.version     = '0.0.3'
   s.date        = '2015-12-07'
   s.summary     = "A bridge between docker-compose and AWS ECS Task Definitions"
   s.description = "A bridge between docker-compose and AWS ECS Task Definitions"
