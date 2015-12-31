@@ -18,6 +18,8 @@ full_task_definition_as_string = c.to_s
 ```
 
 You must ensure that your Docker Compose definiton specifies `image` and `mem_limit` as both are required by ECS.
+
+ComposeECS currently only supports the key-value syntax for environment variables.
 ## CLI
 The CLI tool allows you to convert Docker Compose definitions to ECS Task definitions as part of a shell operation:
 
