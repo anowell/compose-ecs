@@ -73,15 +73,15 @@ class ECSContainerDefinition
     port_map.each do |mapping|
       case mapping.size
       when 1
-        ecs_mapping << { "containerPort" => mapping[0]}
+        ecs_mapping << { "containerPort" => mapping[0].to_i}
       when 2
-        ecs_mapping << { "hostPort" => mapping[0], "containerPort" => mapping[1]}
+        ecs_mapping << { "hostPort" => mapping[0].to_i, "containerPort" => mapping[1].to_i}
       else
         raise "Invalid port mapping: #{mapping}"
       end
     end
 
-    @definition["portMapping"] = ecs_mapping
+    @definition["portMappings"] = ecs_mapping
   end
 
   def compose_environment(environment_map)
@@ -174,7 +174,7 @@ class ComposeECS
   end
 
   def to_s
-    return JSON.pretty_generate(@output)
+    return JSON.pretty_generate(@output[0])
   end
 
   def to_json
