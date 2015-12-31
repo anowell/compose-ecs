@@ -146,6 +146,8 @@ end
 
 class ComposeECS
 
+  attr_accessor :output
+
   def initialize(family, compose_string)
     yaml = YAML.load(compose_string)
     ecs_def = ECSDefinition.new(family)
@@ -171,6 +173,14 @@ class ComposeECS
       end
     end
     @output = ecs_def.build
+  end
+
+  def volumes
+    return JSON.pretty_generate({@output[0]['family'], @output[0]['containerDefinitions']})
+  end
+
+  def volumes
+    return JSON.pretty_generate({@output[0]['volumes']})
   end
 
   def to_s
