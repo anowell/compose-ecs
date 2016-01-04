@@ -1,3 +1,6 @@
+require 'compose-ecs'
+require 'json'
+
 module Spaceape
   module Cloudformation
     class EcsGenerator < Spaceape::Cloudformation::Base
@@ -11,8 +14,12 @@ module Spaceape
         @service = service
         @region = region
         @cfndsl = Pathname(File.join("ecs", @service, "#{@service}.cfndsl"))
+        @compose_yml = Pathname(File.join("ecs", @service, "docker-compose.yml"))
+
         json_out = "#{@service}.json"
         @output = Pathname(File.join("ecs", @service, json_out))
+        @taskdef_output = Pathname(File.join("ecs", @service, "task-definition.json"))
+        @volumes_output = Pathname(File.join("ecs", @service, "volumes.json"))
       end
 
       def config_files
@@ -20,19 +27,8 @@ module Spaceape
       end
 
       def generate( opts = {} )
-        raise "No cfndsl template found at #{@cfndsl}" unless File.exists?(@cfndsl.to_s)
-        raise "No directory found at #{@output.dirname}" unless Dir.exists?(@output.dirname)
-
-        command = "bundle exec cfndsl #{@cfndsl} -y #{File.join("ecs", @service, "config.yml")}"
-        command += " -r #{File.join("ecs", @service, "config-helper.rb")}" if File.exists?(File.join("ecs", @service, "config-helper.rb"))
-        command += " >/tmp/.#{@output.basename}.tmp"
-
-        puts "Generating output to #{@output}"
-        shell_out(command)
-
-        json_output = JSON.pretty_generate(JSON.parse(File.open("/tmp/.#{@output.basename}.tmp", 'r').read))
-        File.open(@output, 'w').write(json_output)
-        File.unlink("/tmp/.#{@output.basename}.tmp") rescue ""
+        generate_cfn(opts)
+        generate_task_def(opts)
       end
 
       def scaffold( opts = {}, *args )
@@ -78,6 +74,36 @@ module Spaceape
 
       private
 
+      def generate_cfn(opts = {})
+        raise "No cfndsl template found at #{@cfndsl}" unless File.exists?(@cfndsl.to_s)
+        raise "No directory found at #{@output.dirname}" unless Dir.exists?(@output.dirname)
+
+        command = "bundle exec cfndsl #{@cfndsl} -y #{File.join("ecs", @service, "config.yml")}"
+        command += " -r #{File.join("ecs", @service, "config-helper.rb")}" if File.exists?(File.join("ecs", @service, "config-helper.rb"))
+        command += " >/tmp/.#{@output.basename}.tmp"
+
+        puts "Generating output to #{@output}"
+        shell_out(command)
+
+        json_output = JSON.pretty_generate(JSON.parse(File.open("/tmp/.#{@output.basename}.tmp", 'r').read))
+        File.open(@output, 'w').write(json_output)
+        File.unlink("/tmp/.#{@output.basename}.tmp") rescue ""
+      end
+
+      def generate_task_def(opts = {})
+        raise "No docker-compose.yml found at #{@compose_yml}." unless File.exists?(@compose_yml.to_s)
+
+        compose_str = File.open(@compose_yml.to_s, 'r').read
+        generated = ComposeECS.new(@service, compose_str)
+
+        File.open(@taskdef_output, 'w').write(generated.no_volumes)
+
+        unless generated.volumes.empty?
+          File.open(@volumes_output.to_s, 'w').write(generated.volumes)
+        else
+          File.delete(@volumes_output.to_s) if File.exist?(@volumes_output.to_s)
+        end
+      end
 
     end
   end
