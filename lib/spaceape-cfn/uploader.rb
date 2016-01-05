@@ -4,6 +4,9 @@ require 'spaceape-lib'
 module Spaceape
   module Cloudformation
     class Uploader < Spaceape::Cloudformation::Base
+      attr_accessor :region
+      attr_accessor :aws_config
+    
       include Spaceape::AWS
 
       DEFAULT_LOCKED_POLICY = "policies/locked.json"

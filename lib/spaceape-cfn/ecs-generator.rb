@@ -2,6 +2,7 @@ module Spaceape
   module Cloudformation
     class EcsGenerator < Spaceape::Cloudformation::Base
       attr_accessor :service
+      attr_accessor :region
 
       CONFIG_TEMPLATE = "ecs-config.yml.tmpl"
       SKEL_DIRECTORY ="./skel"
@@ -28,7 +29,7 @@ module Spaceape
       	puts "Generating output to #{@output}"
       	shell_out(command)
         json_output = JSON.pretty_generate(JSON.parse(File.open("/tmp/.#{@output.basename}.tmp", 'r').read))
-        File.open(@output, 'w').write(json_output)
+        File.open(@output.to_s, 'w').write(json_output)
         File.unlink("/tmp/.#{@output.basename}.tmp") rescue ""
       end
 
