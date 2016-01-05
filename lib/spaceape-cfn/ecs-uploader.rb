@@ -4,6 +4,9 @@ require 'spaceape-lib'
 module Spaceape
   module Cloudformation
     class EcsUploader < Spaceape::Cloudformation::Base
+      attr_accessor :region
+      attr_accessor :aws_config
+
       include Spaceape::AWS
 
       DEFAULT_LOCKED_POLICY = "policies/ecs-locked.json"
@@ -16,7 +19,7 @@ module Spaceape
         @aws_config = aws_config
         @region = region
         check_json(File.join("ecs", @service, "#{@service}.json"))
-        check_json(File.join("ecs", @service, "task-definition.json")) if File.exists?(File.join("ecs", @service, "volumes.json"))
+        check_json(File.join("ecs", @service, "task-definition.json")) if File.exists?(File.join("ecs", @service, "task-definition.json"))
         check_json(File.join("ecs", @service, "volumes.json")) if File.exists?(File.join("ecs", @service, "volumes.json"))
       end
 

@@ -87,7 +87,7 @@ module Spaceape
         shell_out(command)
 
         json_output = JSON.pretty_generate(JSON.parse(File.open("/tmp/.#{@output.basename}.tmp", 'r').read))
-        File.open(@output, 'w').write(json_output)
+        File.open(@output.to_s, 'w').write(json_output)
         File.unlink("/tmp/.#{@output.basename}.tmp") rescue ""
       end
 
