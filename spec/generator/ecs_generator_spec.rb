@@ -1,8 +1,14 @@
 require 'spec_helper'
 
-class ComposeECS
+class MockComposeECS
+  attr_accessor :volumes
+  @volumes = []
   def generate
     return true
+  end
+
+  def no_volumes
+    return ""
   end
 end
 
@@ -67,23 +73,12 @@ describe Spaceape::Cloudformation::Generator do
       %x[ mkdir -p ecs/myService && touch ecs/myService/myService.cfndsl && touch ecs/myService/config.yml ]
       %x[ touch ecs/myService/config-helper.rb ecs/myService/docker-compose.yml ]
       expect(@generator).to receive(:shell_out).and_return("")  
-      expect(File).to receive(:open).with("ecs/myService/docker-compose.yml", "r").and_return(@buf)
+      expect(@generator).to receive(:generate_task_def).and_return(true)  
       expect(File).to receive(:open).with("/tmp/.myService.json.tmp", "r").and_return(@buf)
       allow(JSON).to receive(:parse).and_return(Array.new)
       expect(File).to receive(:open).once.ordered.with("ecs/myService/myService.json", "w").and_return(@buf)
       @generator.generate
     end
 
-    it 'should convert docker-compose to task-definition' do
-      @buf = StringIO.new()
-      %x[ mkdir -p ecs/myService && touch ecs/myService/myService.cfndsl && touch ecs/myService/config.yml ]
-      %x[ touch ecs/myService/config-helper.rb ecs/myService/docker-compose.yml ]
-      expect(@generator).to receive(:shell_out).and_return("")
-      expect(File).to receive(:open).with("/tmp/.myService.json.tmp", "r").and_return(@buf)
-      allow(JSON).to receive(:parse).and_return(Array.new)
-      expect(File).to receive(:open).once.ordered.with("ecs/myService/myService.json", "w").and_return(@buf)
-      expect_any_instance_of(ComposeECS).to receive(:new).with("")
-      @generator.generate
-    end
   end
 end
