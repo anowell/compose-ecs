@@ -1,0 +1,15 @@
+sudo: false
+language: ruby
+rvm:
+- 2.0.0 
+
+notifications:
+  slack:
+    secure: UHdirS99Ilt5qlOJvNuCwwHZDNKmohVCs0FePfFPD7lHNEVxMo+PR3O/5RgdIlrJx7ylP3cpMU19+fDf1qnxZBi3ANvFm2s2xdZ80PrpzXvdkUd12MGKG1sqVcczUsKwIC4G6R77zHILfhk1LDgmmtdFMXWBi9RdyF96brj+lV4= 
+
+git:
+  submodules: true
+
+install: bundle install && gem build ./spaceape-cfn.gemspec && gem install ./$( ls *.gem | sort -n | tail -1 ) --local --no-rdoc --no-ri
+
+script: bundle exec rspec -b spec
