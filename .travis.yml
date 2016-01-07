@@ -5,7 +5,7 @@ rvm:
 
 notifications:
   slack:
-    secure: UHdirS99Ilt5qlOJvNuCwwHZDNKmohVCs0FePfFPD7lHNEVxMo+PR3O/5RgdIlrJx7ylP3cpMU19+fDf1qnxZBi3ANvFm2s2xdZ80PrpzXvdkUd12MGKG1sqVcczUsKwIC4G6R77zHILfhk1LDgmmtdFMXWBi9RdyF96brj+lV4= 
+    secure: cbnzdPnd3MbMQha9Y9DMPKMooONjKXgRtbNEOE3J8m1RL2fGlGXBTS3saqN0b+FM3uYc0tatn7PCkutuD0uSEuei8wcIp8ndprkXzQoYEsfJkZ1sHoWSWbB0BLfZ98XmoEO/pby6kN2YFmP+wTpWGn0sXo1qrJtn4ueRq6kx+mU= 
 
 git:
   submodules: true
