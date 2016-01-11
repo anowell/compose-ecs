@@ -5,7 +5,7 @@ module Spaceape
   module Cloudformation
     class LaunchConf < Spaceape::Cloudformation::Base
       include Spaceape::AWS
-      attr_accessor :service
+      attr_accessor :type
       attr_accessor :region
   
       AMI_MAP = 'launch_configs/amis.yml'
@@ -39,7 +39,7 @@ module Spaceape
 
         tmp_conf = "/tmp/.#{@output.basename}.attrs.tmp"
         tmp_out = "/tmp/.#{@output.basename}.tmp"
-        File.open(tmp_conf,'w') { |f| f.write(YAML.dump(parsed_config(config_file))); f.close }
+        File.open(tmp_conf,'w') { |f| f.write(YAML.dump(parsed_config(config_file))) }
 
         command = "bundle exec cfndsl #{@cfndsl} -y #{tmp_conf} -r #{config_helper} >#{tmp_out}"
         puts "Generating output to #{@output}"
