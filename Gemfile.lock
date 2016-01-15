@@ -31,7 +31,7 @@ PLATFORMS
 
 DEPENDENCIES
   compose-ecs!
-  rake
+  rake (~> 10.5.0)
   rspec (~> 3.4)
 
 BUNDLED WITH
