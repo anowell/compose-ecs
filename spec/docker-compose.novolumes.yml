@@ -1,0 +1,24 @@
+db:
+  mem_limit: 1024
+  image: mysql
+  ports:
+   - "3306:3306"
+  environment:
+    MYSQL_ROOT_PASSWORD: password
+redis:
+  mem_limit: 1024
+  image: redis
+  ports:
+   - "6379:6379"
+app:
+  mem_limit: 2048
+  image: testapp
+  command: "testapp"
+  ports:
+    - "3000:3000"
+  links:
+    - db:db
+    - redis:redis
+  environment:
+   REDIS_URL: redis://redis:6379/0
+   DB_URL: db:3306
