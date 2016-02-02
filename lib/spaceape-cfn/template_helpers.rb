@@ -43,10 +43,12 @@ module Spaceape
       	next unless config_hash["services"][service]["listeners"]
 	      config_hash["services"][service]["listeners"].each do |entry|
 	        raise "Invalid listener specification" unless entry =~ /(?<elb>\d+).-.(?<inst>\d+).?(?<proto>\w+)?/
+	        raise "Invalid listener specification" unless entry =~ /(?<elb>\d+).-.(?<inst>\d+).?(?<proto>\w+)?(.-.(?<inst_proto>\w+))?/
           listener = {}
 	        listener["LoadBalancerPort"] = $~[:elb]
       	  listener["InstancePort"] = $~[:inst]
       	  listener["Protocol"] =  $~[:proto] ? $~[:proto] : 'HTTP'
+          listener["InstanceProtocol"] = $~[:inst_proto] if $~[:inst_proto]
       	  listener["SSLCertificateId"] = config_hash["services"][service]["ssl"]["certificate"] if config_hash["services"][service]["ssl"]
       	  listeners << listener
  	      end
