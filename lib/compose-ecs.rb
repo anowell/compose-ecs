@@ -99,13 +99,28 @@ class ECSContainerDefinition
   def compose_command(command)
     return if command.nil?
 
-    @definition["command"] = command.delete('"').split(" ")
+    if command.class == Array or command.class == String
+      @definition["command"] = command
+    else
+      raise "Command must be of type Array or String"
+    end
   end
 
   def compose_memory(memory)
     raise "You must define a mem_limit for container: #{@definition["name"]}" if memory.nil?
+    raise "mem_limit must be of type String. Value provided is of type #{memory.class}" if memory.class != String
 
-    @definition["memory"] = memory
+    unit = memory[-1]
+    value = memory[0..-2].to_i  # Remove the unit
+
+    case unit
+    when "m"
+      @definition["memory"] = value
+    when "g"
+      @definition["memory"] = value * 1024
+    else
+      raise "Unsupported memory unit. Supported values: m(MB), g(GB)"
+    end
   end
 
   def compose_links(link_map)
