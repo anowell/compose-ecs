@@ -12,6 +12,7 @@ module Spaceape
         config_hash["services"].keys.each do |service|
           rule = {}
           ext = nil
+          protocol = config_hash["services"][service].fetch("protocol") { 'tcp' }
           config_hash["services"][service]["ports"].each do |port|
             if port  =~ /(?<from>\d+).-.(?<to>\d+)(\s+(?<ext>EXTERNAL))?/
               from = $~[:from]
@@ -26,7 +27,7 @@ module Spaceape
 
             rule["FromPort"] = from
             rule["ToPort"] = to
-            rule["IpProtocol"] = 'tcp'
+            rule["IpProtocol"] = protocol
             ips = ext ? %w[ 0.0.0.0/0 ] : config_hash["TRUSTED_IP_RANGES"] 
             ips.each do |ip_range|
               rule["CidrIp"] = ip_range
