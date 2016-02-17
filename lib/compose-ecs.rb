@@ -96,6 +96,12 @@ class ECSContainerDefinition
     @definition["environment"] = ecs_environment
   end
 
+  def compose_hostname(hostname)
+    raise "hostname must be of type String" if hostname.class != String
+
+    @definition["hostname"] = hostname
+  end
+
   def compose_command(command)
     return if command.nil?
 
@@ -176,6 +182,7 @@ class ComposeECS
       ecs_container_def.compose_image(container_data['image'])
       ecs_container_def.compose_memory(container_data['mem_limit'])
       ecs_container_def.compose_command(container_data['command'])
+      ecs_container_def.compose_hostname(container_data['hostname'])
       ecs_container_def.compose_environment(container_data['environment'])
       ecs_container_def.compose_links(container_data['links'])
 
