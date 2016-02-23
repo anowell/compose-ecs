@@ -1,11 +1,10 @@
 require 'rake/testtask'
 
-Rake::TestTask.new do |t|
-	  t.libs << 'test'
-end
-
-desc "Run tests"
 task :default => :test
+
+task :test do
+  sh 'bundle exec rspec'
+end
 
 task :buildinstall  do
   sh 'gem build ./compose-ecs.gemspec'
