@@ -34,16 +34,16 @@ describe ComposeECS do
     end
 
     it "parses volumes in docker-compose format" do
-      expect(JSON.parse(@compose.volumes)["volumes"]).to eq([{"name"=>"test-volume-0", "host"=>{"sourcePath"=>"/home/mysql"}}])
+      expect(JSON.parse(@compose.volumes)).to eq([{"name"=>"test-volume-0", "host"=>{"sourcePath"=>"/home/mysql"}}])
     end
 
     it "does not duplicate ECS volume definitions if multiple container volumes reference the same ECS volume" do
-      expect(JSON.parse(@compose.volumes)["volumes"].size).to eq(1)
+      expect(JSON.parse(@compose.volumes).size).to eq(1)
     end
 
     it "should produce valid JSON where expected" do
       expect(JSON.parse(@compose.to_s).class).to equal(Hash)
-      expect(JSON.parse(@compose.volumes).class).to equal(Hash)
+      expect(JSON.parse(@compose.volumes).class).to equal(Array)
       expect(JSON.parse(@compose.no_volumes).class).to equal(Hash)
     end
 
@@ -51,9 +51,9 @@ describe ComposeECS do
       expect(JSON.parse(@compose.no_volumes)["volumes"]).to be_nil
     end
 
-    it "should only return volumes from the volumes method" do
-      expect(JSON.parse(@compose.volumes).keys.first).to eq("volumes")
-      expect(JSON.parse(@compose.volumes).keys.size).to eq(1)
+    it "should only return volumes array from the volumes method" do
+      expect(JSON.parse(@compose.volumes).size).to eq(1)
+      expect(JSON.parse(@compose.volumes).class).to equal(Array)
     end
   end
 

@@ -204,7 +204,7 @@ class ComposeECS
 
   def volumes
     if @output[0].keys.include? 'volumes'
-      return JSON.pretty_generate({'volumes' => @output[0]['volumes']})
+      return JSON.pretty_generate(@output[0]['volumes'])
     else
       return ""
     end
