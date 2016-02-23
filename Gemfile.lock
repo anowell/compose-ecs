@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    compose-ecs (0.0.4)
+    compose-ecs (0.0.6)
       gli (~> 2.13.2)
       json (~> 1.8.3)
 
@@ -35,4 +35,4 @@ DEPENDENCIES
   rspec (~> 3.4)
 
 BUNDLED WITH
-   1.10.6
+   1.11.2
