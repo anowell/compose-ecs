@@ -1,17 +1,17 @@
 db:
-  mem_limit: 1024
+  mem_limit: 1024m
   image: mysql
   ports:
    - "3306:3306"
   environment:
     MYSQL_ROOT_PASSWORD: password
 redis:
-  mem_limit: 1024
+  mem_limit: 1024m
   image: redis
   ports:
    - "6379:6379"
 app:
-  mem_limit: 2048
+  mem_limit: 20g
   image: testapp
   command: "testapp"
   ports:

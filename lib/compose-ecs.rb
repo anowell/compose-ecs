@@ -97,6 +97,7 @@ class ECSContainerDefinition
   end
 
   def compose_hostname(hostname)
+    return if hostname.nil?
     raise "hostname must be of type String" if hostname.class != String
 
     @definition["hostname"] = hostname

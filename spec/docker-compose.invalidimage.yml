@@ -1,4 +1,5 @@
 db:
+  mem_limit: 20g
   image: mysql
   ports:
    - "3306:3306"
@@ -8,9 +9,11 @@ db:
   environment:
     MYSQL_ROOT_PASSWORD: password
 redis:
+  mem_limit: 20g
   ports:
    - "6379:6379"
 app:
+  mem_limit: 20g
   image: testapp
   command: "testapp"
   ports:
