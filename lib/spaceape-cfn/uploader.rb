@@ -68,7 +68,7 @@ module Spaceape
       # the actual size. Warn if instances will be terminated
       def check_asg_size(stackname, template)
         puts "Running ASG checks against #{stackname}. Skip with --no-asg-check".bold
-        cfn = setup_amazon("CloudFormation")
+        cfn = setup_amazon("CloudFormation", @aws_config, @region)
         stack = cfn.stacks[stackname] 
         as_groups = Hash.new {|k,v| k[v] = Hash.new }
         stack.resources.each do |r|
@@ -78,7 +78,7 @@ module Spaceape
         end
 
         j = JSON.parse(File.read(template))
-        as = setup_amazon("AutoScaling")
+        as = setup_amazon("AutoScaling", @aws_config, @region)
         as_groups.keys.each do |asg|
           puts "Found ASG #{asg}. Gathering information".bold
           logical = as_groups[asg]["logical_id"]
