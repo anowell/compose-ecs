@@ -36,6 +36,7 @@ module Spaceape
       def update_stack(opts = {})
         opts[:policy] ||= DEFAULT_LOCKED_POLICY
         check_json(opts[:policy])
+        check_asg_size(opts[:stackname], File.join(@service, @env, "#{@service}.json")) unless opts[:no_asg_check]
         stack_command(:update, opts[:stackname], opts[:policy])
       end
 
@@ -57,9 +58,50 @@ module Spaceape
           method = :update_stack
         end
 
-        puts msg + "#{stack_name} using template at #{File.join(@service, @env, "#{@service}.json")} with policy #{policy}"
+        msg += "#{stack_name} using template at #{File.join(@service, @env, "#{@service}.json")} with policy #{policy}"
+        puts msg.bold
         cfn = setup_amazon('CloudFormation::Client', @aws_config, @region)  
         cfn.method(method).call(opts)
+      end
+
+      # Compare the proposed maxSize of the AS group against
+      # the actual size. Warn if instances will be terminated
+      def check_asg_size(stackname, template)
+        puts "Running ASG checks against #{stackname}. Skip with --no-asg-check".bold
+        cfn = setup_amazon("CloudFormation")
+        stack = cfn.stacks[stackname] 
+        as_groups = Hash.new {|k,v| k[v] = Hash.new }
+        stack.resources.each do |r|
+          if r.resource_type == "AWS::AutoScaling::AutoScalingGroup"
+            as_groups[r.physical_resource_id]["logical_id"] = r.logical_resource_id
+          end
+        end
+
+        j = JSON.parse(File.read(template))
+        as = setup_amazon("AutoScaling")
+        as_groups.keys.each do |asg|
+          puts "Found ASG #{asg}. Gathering information".bold
+          logical = as_groups[asg]["logical_id"]
+          instance_count = as.groups[asg].desired_capacity.to_i
+          puts "Logical ID is #{logical}".bold
+          # Gather data from the template
+          max_ref = j["Resources"][logical]["Properties"]["MaxSize"]["Ref"]
+          local_max = j["Parameters"][max_ref]["Default"]
+          # Compare and panic!
+          if local_max < instance_count
+            puts "WARNING! Size of #{asg} (#{instance_count}) is larger than proposed max of #{local_max}".red
+            puts "This update would result in the loss of #{instance_count - local_max} instances.".red
+            puts "NOT continuing".cyan
+            exit(2)
+          end
+
+          puts "Found #{instance_count} instances. OK".green
+        end
+
+        
+        rescue => e
+          puts "Unable to check ASG size(s) of #{stackname}: #{e}"
+          exit(2)
       end
 
     end
