@@ -83,6 +83,7 @@ command :update do |c|
   c.switch [:y]
   c.switch [:no_taskdef, 'no-taskdef']
   c.switch [:taskdef_only, 'taskdef-only']
+  c.switch [:no_asg_check, 'no-asg-check']
   c.action do |globals, options, args|
     help_now!("Wrong number of arguments for build") unless args.length == 2
     args << globals[:region]
