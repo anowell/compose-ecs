@@ -13,6 +13,7 @@ Gem::Specification.new do |s|
 
   s.add_development_dependency 'rake', '~> 10.5.0'
   s.add_development_dependency 'rspec', '~> 3.4'
+  s.add_development_dependency 'gem-release', '~> 0.7.4'
 
   s.add_runtime_dependency 'json', '~> 1.8.3'
   s.add_runtime_dependency 'gli', '~> 2.13.2'

@@ -9,6 +9,7 @@ GEM
   remote: https://rubygems.org/
   specs:
     diff-lcs (1.2.5)
+    gem-release (0.7.4)
     gli (2.13.4)
     json (1.8.3)
     rake (10.5.0)
@@ -31,6 +32,7 @@ PLATFORMS
 
 DEPENDENCIES
   compose-ecs!
+  gem-release (~> 0.7.4)
   rake (~> 10.5.0)
   rspec (~> 3.4)
 
