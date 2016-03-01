@@ -19,5 +19,5 @@ Gem::Specification.new do |s|
 
   s.add_dependency 'cfndsl', '>= 0.1.11'
   s.add_dependency 'spaceape-lib', '>= 0.4.10'
-  s.add_dependency 'compose-ecs', '>= 0.0.6'
+  s.add_dependency 'compose-ecs', '>= 0.0.7'
 end
