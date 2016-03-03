@@ -44,13 +44,20 @@ module Spaceape
           next unless config_hash["services"][service]["listeners"]
           config_hash["services"][service]["listeners"].each do |entry|
             rule = {}
-            if entry.fetch('external') { false }
-              rule["IpProtocol"] = 'tcp'
-              rule["CidrIp"] = "0.0.0.0/0"
-              rule["ToPort"] = entry.fetch('elb_port') { :missing_elb_port }
-              rule["FromPort"] = entry.fetch('elb_port') { :missing_elb_port }
+            ranges = entry.fetch('external_ranges') { %w(0.0.0.0/0) }
+            if ranges == 'trusted'
+              ranges = TRUSTED_IP_RANGES
             end
-            security_group << rule.dup
+
+            ranges.each do |range|
+              if entry.fetch('external') { false }
+                rule["IpProtocol"] = 'tcp'
+                rule["CidrIp"] = range
+                rule["ToPort"] = entry.fetch('elb_port') { :missing_elb_port }
+                rule["FromPort"] = entry.fetch('elb_port') { :missing_elb_port }
+              end
+              security_group << rule.dup
+            end
           end
         end
         return security_group
