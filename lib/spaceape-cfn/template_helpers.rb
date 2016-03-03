@@ -38,6 +38,24 @@ module Spaceape
         return security_group
       end
 
+      def self.build_external_elb_security_group(config_hash)
+        security_group = []
+        config_hash["services"].keys.each do |service|
+          next unless config_hash["services"][service]["listeners"]
+          config_hash["services"][service]["listeners"].each do |entry|
+            rule = {}
+            if entry.fetch('external') { false }
+              rule["IpProtocol"] = 'tcp'
+              rule["CidrIp"] = "0.0.0.0/0"
+              rule["ToPort"] = entry.fetch('elb_port') { :missing_elb_port }
+              rule["FromPort"] = entry.fetch('elb_port') { :missing_elb_port }
+            end
+            security_group << rule.dup
+          end
+        end
+        return security_group
+      end
+
       def self.build_listeners(config_hash)
         listeners = []
         config_hash["services"].keys.each do |service|
