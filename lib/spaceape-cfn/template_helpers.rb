@@ -61,14 +61,31 @@ module Spaceape
         config_hash["services"].keys.each do |service|
           next unless config_hash["services"][service]["listeners"]
           config_hash["services"][service]["listeners"].each do |entry|
-            raise "Invalid listener specification" unless entry =~ /(?<elb>\d+).-.(?<inst>\d+).?(?<proto>\w+)?/
-            raise "Invalid listener specification" unless entry =~ /(?<elb>\d+).-.(?<inst>\d+).?(?<proto>\w+)?(.-.(?<inst_proto>\w+))?/
             listener = {}
-            listener["LoadBalancerPort"] = $~[:elb]
-            listener["InstancePort"] = $~[:inst]
-            listener["Protocol"] =  $~[:proto] ? $~[:proto] : 'HTTP'
-            listener["InstanceProtocol"] = $~[:inst_proto] if $~[:inst_proto]
-            listener["SSLCertificateId"] = config_hash["services"][service]["ssl"]["certificate"] if config_hash["services"][service]["ssl"]
+            entry =~ /(?<elb>\d+).-.(?<inst>\d+).?(?<proto>\w+)?/
+            entry =~ /(?<elb>\d+).-.(?<inst>\d+).?(?<proto>\w+)?(.-.(?<inst_proto>\w+))?/
+            if $~
+              listener["LoadBalancerPort"] = $~[:elb]
+              listener["InstancePort"] = $~[:inst]
+              listener["Protocol"] =  $~[:proto] ? $~[:proto] : 'HTTP'
+              listener["InstanceProtocol"] = $~[:inst_proto] if $~[:inst_proto]
+              if config_hash["services"][service]["ssl"]
+                listener["SSLCertificateId"] = config_hash["services"][service]["ssl"]["certificate"]
+                listener["PolicyNames"] = config_hash["services"][service]["ssl"].fetch("policy") { [] }
+              end
+            else
+              listener["LoadBalancerPort"] = entry.fetch('elb_port') { :missing_elb_port }
+              listener["InstancePort"] = entry.fetch('instance_port') { :missing_instance_port }
+              listener["Protocol"] = entry.fetch('elb_protocol') { 'HTTP' }
+              listener["InstanceProtocol"] = entry.fetch('instance_protocol') { 'TCP' }
+              ssl = entry.fetch('ssl') { :no_ssl }
+              unless ssl == :no_ssl
+                listener["SSLCertificateId"] = ssl.fetch("certificate")
+                listener["PolicyNames"] = ssl.fetch("policy") { [] }
+              end
+            end
+            # Clear the match data local variable
+            $~ = nil
             listeners << listener
           end
         end
