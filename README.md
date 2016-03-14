@@ -1,6 +1,8 @@
 # compose-ecs
 Convert Docker Compose files into AWS ECS Task Definitions
 
+[![Build Status](https://travis-ci.com/spaceapegames/compose-ecs.svg?token=PLVFspnXYyAs4yV7xzCM&branch=master)](https://travis-ci.com/spaceapegames/compose-ecs)
+
 ## ComposeECS
 You can use the ComposeECS object to convert Docker Compose definitions to ECS Task definitions like so:
 ```ruby
