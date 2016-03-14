@@ -1,0 +1,5 @@
+bump:
+  tag: true
+
+release:
+  host: 'https://UuqPBLJdeCGryipW7w7F@repo.fury.io/spaceapegames/'
