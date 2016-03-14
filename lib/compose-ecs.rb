@@ -103,6 +103,13 @@ class ECSContainerDefinition
     @definition["hostname"] = hostname
   end
 
+  def compose_dns(dns)
+    return if dns.nil?
+    raise "dns must be of type Array" if hostname.class != Array
+
+    @definition["dnsServers"] = dns
+  end
+
   def compose_command(command)
     return if command.nil?
 
@@ -184,6 +191,7 @@ class ComposeECS
       ecs_container_def.compose_memory(container_data['mem_limit'])
       ecs_container_def.compose_command(container_data['command'])
       ecs_container_def.compose_hostname(container_data['hostname'])
+      ecs_container_def.compose_dns(container_data['dns'])
       ecs_container_def.compose_environment(container_data['environment'])
       ecs_container_def.compose_links(container_data['links'])
 
