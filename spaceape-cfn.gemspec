@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = "spaceape-cfn"
-  s.version     = '0.1.17'
+  s.version     = '0.1.18'
   s.authors     = ["Louis McCormack", "Josh McGhee"]
   s.email       = "ops@spaceapegames.com"
   s.homepage    = "http://www.spaceapegames.com"
@@ -19,5 +19,5 @@ Gem::Specification.new do |s|
 
   s.add_dependency 'cfndsl', '>= 0.1.11'
   s.add_dependency 'spaceape-lib', '>= 0.4.10'
-  s.add_dependency 'compose-ecs', '>= 0.0.7'
+  s.add_dependency 'compose-ecs', '>= 0.0.8'
 end
