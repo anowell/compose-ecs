@@ -20,6 +20,7 @@ app:
   command: "testapp -v debug"
   ports:
     - "3000:3000"
+    - "3000:3000/udp"
   links:
     - db:db
     - redis:redis

@@ -67,15 +67,21 @@ class ECSContainerDefinition
     return if port_map.nil?
 
     ecs_mapping = []
+    protocol = "tcp"
 
     port_map = port_map.map{ |pm| pm.split(":") if !pm.nil? }
 
     port_map.each do |mapping|
+      if mapping[mapping.size - 1].include?("/udp")
+        mapping[mapping.size - 1] = mapping[mapping.size - 1].split('/').first
+        protocol = "udp"
+      end
+
       case mapping.size
       when 1
-        ecs_mapping << { "containerPort" => mapping[0].to_i}
+        ecs_mapping << { "containerPort" => mapping[0].to_i, "protocol" => protocol}
       when 2
-        ecs_mapping << { "hostPort" => mapping[0].to_i, "containerPort" => mapping[1].to_i}
+        ecs_mapping << { "hostPort" => mapping[0].to_i, "containerPort" => mapping[1].to_i, "protocol" => protocol}
       else
         raise "Invalid port mapping: #{mapping}"
       end
