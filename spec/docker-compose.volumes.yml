@@ -14,6 +14,8 @@ redis:
   image: redis
   ports:
    - "6379:6379"
+  volumes_from:
+    - db
 app:
   mem_limit: 2g
   image: testapp
