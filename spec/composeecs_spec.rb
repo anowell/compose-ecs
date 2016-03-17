@@ -9,7 +9,7 @@ describe ComposeECS do
     end
 
     it "parses port definitions in docker-compose format" do
-      expect(@compose.to_hash.first["containerDefinitions"].select{|c| c["name"] == "app"}.first["portMappings"]).to eq([{"hostPort"=>3000, "containerPort"=>3000}])
+      expect(@compose.to_hash.first["containerDefinitions"].select{|c| c["name"] == "app"}.first["portMappings"]).to eq([{"hostPort"=>3000, "containerPort"=>3000, "protocol"=>"tcp"}, {"hostPort"=>3000, "containerPort"=>3000, "protocol"=>"udp"}])
     end
 
     it "parses an environment definiton in docker-compose key-value format" do
