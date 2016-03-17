@@ -12,6 +12,9 @@ redis:
   command: ["redis-server", "-p", "6379"]
   mem_limit: 1024m
   image: redis
+  labels:
+    product: esell
+    environment: staging
   ports:
    - "6379:6379"
   volumes_from:

@@ -109,6 +109,15 @@ class ECSContainerDefinition
     @definition["hostname"] = hostname
   end
 
+  def compose_labels(labels)
+    return if labels.nil?
+    raise "Labels must be of type Hash" if labels.class != Hash
+    raise "Label values must be of type String" if !labels.values.select{ |v| v.class != String }.empty?
+    raise "Label values must be of type String" if !labels.keys.select{ |v| v.class != String }.empty?
+
+    @definition["dockerLabels"] = labels
+  end
+
   def compose_dns(dns)
     return if dns.nil?
     raise "dns must be of type Array" if hostname.class != Array
@@ -204,6 +213,7 @@ class ComposeECS
       ecs_container_def.compose_memory(container_data['mem_limit'])
       ecs_container_def.compose_command(container_data['command'])
       ecs_container_def.compose_hostname(container_data['hostname'])
+      ecs_container_def.compose_labels(container_data['labels'])
       ecs_container_def.compose_dns(container_data['dns'])
       ecs_container_def.compose_volumesfrom(container_data['volumes_from'])
       ecs_container_def.compose_environment(container_data['environment'])
