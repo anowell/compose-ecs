@@ -26,7 +26,10 @@ module Spaceape
         config_files[1..-1].each do |f|
           attr.merge!(YAML.load(File.open(f)))
         end
-        return attr
+
+        # Now expand any macros present in the config (e.g. __VPC__ )
+        expander = Spaceape::Cloudformation::ConfigExpander.new(attr)
+        return expander.expand 
       end
 
       def generate( opts = {} )
@@ -107,7 +110,8 @@ module Spaceape
 	        File.open(File.join(@service, @env, "#{@env}.yml"), 'w') {|f| f.write(YAML.dump(yaml)) }
       	end
 
-      	FileUtils.cp('./config-helper.rb', File.join(@service, 'config-helper.rb'))   
+      	FileUtils.cp('./config-helper.rb', File.join(@service, 'config-helper.rb')) unless File.exists(File.join(@service, 'config-helper.rb'))   
+
    end
 
       private
