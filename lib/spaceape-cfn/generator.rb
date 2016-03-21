@@ -1,3 +1,4 @@
+require 'fileutils'
 module Spaceape
   module Cloudformation
     class Generator < Spaceape::Cloudformation::Base
@@ -8,12 +9,18 @@ module Spaceape
       GAME = "trex"
       CONFIG_TEMPLATE = "config.yml.tmpl"
       SKEL_DIRECTORY ="./skel"
+      SHARED_CONFIG = "./shared-config.yml"
 
       def initialize(service, env, region='us-east-1')
         super
       	@cfndsl = Pathname(File.join(@service, "#{@service}.cfndsl"))
       	json_out = "#{@service}.json"
-      	@output = Pathname(File.join(@service, @env, json_out))
+        @region = region
+        if @region == "us-east-1"
+        	@output = Pathname(File.join(@service, @env, json_out))
+        else
+          @output = Pathname(File.join(@service, @env, @region, json_out))
+        end
       end
 
       def config_files
@@ -28,21 +35,34 @@ module Spaceape
         end
 
         # Now expand any macros present in the config (e.g. __VPC__ )
-        expander = Spaceape::Cloudformation::ConfigExpander.new(attr)
+        expander = Spaceape::Cloudformation::ConfigExpander.new(attr, { :region => @region } )
         return expander.expand 
       end
 
       def generate( opts = {} )
         raise "No cfndsl template found at #{@cfndsl}" unless File.exists?(@cfndsl.to_s)
-	      raise "No directory found at #{@output.dirname}" unless Dir.exists?(@output.dirname)
+        if @region == "us-east-1"
+	        raise "No directory found at #{@output.dirname}" unless Dir.exists?(@output.dirname)
+        else
+	        raise "No directory found at #{@output.dirname.dirname}" unless Dir.exists?(@output.dirname.dirname)
+          FileUtils.mkdir(@output.dirname) unless Dir.exists?(@output.dirname)
+        end
+	      raise "No shared config found at #{SHARED_CONFIG}" unless File.exists?(SHARED_CONFIG)
       	opts[:config_helper] ||= File.join(@service, '/config-helper.rb')
         File.open("/tmp/.#{@output.basename}.attrs.tmp",'w') { |f| f.write(YAML.dump(parsed_config)); f.close }
-        command = "bundle exec cfndsl #{@cfndsl} -y /tmp/.#{@output.basename}.attrs.tmp -r #{opts[:config_helper]} >/tmp/.#{@output.basename}.tmp"
+
+        # LAUNCH_CONFIG is a special case, it needs to be injected in 
+        __LAUNCHCONFIG__ = parsed_config["LAUNCH_CONFIG"]
+        erb = ERB.new(File.read(@cfndsl))
+        File.open("/tmp/.#{@output.basename}.tmp.erb", 'w') { |f| f.write(erb.result(binding)) }
+        
+        command = "bundle exec cfndsl /tmp/.#{@output.basename}.tmp.erb -y /tmp/.#{@output.basename}.attrs.tmp -r #{opts[:config_helper]} >/tmp/.#{@output.basename}.tmp"
       	puts "Generating output to #{@output}"
       	shell_out(command)
         json_output = JSON.pretty_generate(JSON.parse(File.open("/tmp/.#{@output.basename}.tmp", 'r').read))
         File.open(@output.to_s, 'w').write(json_output)
         File.unlink("/tmp/.#{@output.basename}.tmp") rescue ""
+#        File.unlink("/tmp/.#{@output.basename}.tmp.erb") rescue ""
         File.unlink("/tmp/.#{@output.basename}.attrs.tmp") rescue ""
       end
 
@@ -110,7 +130,7 @@ module Spaceape
 	        File.open(File.join(@service, @env, "#{@env}.yml"), 'w') {|f| f.write(YAML.dump(yaml)) }
       	end
 
-      	FileUtils.cp('./config-helper.rb', File.join(@service, 'config-helper.rb')) unless File.exists(File.join(@service, 'config-helper.rb'))   
+      	FileUtils.cp('./config-helper.rb', File.join(@service, 'config-helper.rb')) unless File.exists?(File.join(@service, 'config-helper.rb'))   
 
    end
 

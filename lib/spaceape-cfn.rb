@@ -4,6 +4,7 @@ require 'spaceape-cfn/ecs-generator'
 require 'spaceape-cfn/uploader'
 require 'spaceape-cfn/ecs-uploader'
 require 'spaceape-cfn/launch-conf'
+require 'spaceape-cfn/config-expander'
 
 class String
   def red;   "\033[31m#{self}\033[0m" end

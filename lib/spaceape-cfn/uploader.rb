@@ -18,7 +18,12 @@ module Spaceape
         @env = env
         @aws_config = aws_config
         @region = region
-        check_json(File.join(@service, @env, "#{@service}.json"))
+        if @region == "us-east-1"
+          @json = File.join(@service, @env, "#{@service}.json")
+        else
+          @json = File.join(@service, @env, @region, "#{@service}.json") 
+        end
+        check_json(@json)
       end
 
       def check_json(json)
@@ -36,29 +41,29 @@ module Spaceape
       def update_stack(opts = {})
         opts[:policy] ||= DEFAULT_LOCKED_POLICY
         check_json(opts[:policy])
-        check_asg_size(opts[:stackname], File.join(@service, @env, "#{@service}.json")) unless opts[:no_asg_check]
+        check_asg_size(opts[:stackname], @json) unless opts[:no_asg_check]
         stack_command(:update, opts[:stackname], opts[:policy])
       end
 
       def stack_command(action, stack_name, policy)
         opts = { :stack_name => stack_name,
-                 :template_body => File.open(File.join(@service, @env, "#{@service}.json")).read,
+                 :template_body => File.read(@json), 
                  :capabilities => [ 'CAPABILITY_IAM' ]
 	       }
 
         case action
         when :create
-          opts[:stack_policy_body] = File.open(policy).read
+          opts[:stack_policy_body] = File.read(policy)
           opts[:disable_rollback] = true
           msg = "Creating "
           method = :create_stack
         when :update
-          opts[:stack_policy_during_update_body] = File.open(policy).read
+          opts[:stack_policy_during_update_body] = File.read(policy)
           msg = "Updating "
           method = :update_stack
         end
 
-        msg += "#{stack_name} using template at #{File.join(@service, @env, "#{@service}.json")} with policy #{policy}"
+        msg += "#{stack_name} using template at #{@json} with policy #{policy}"
         puts msg.bold
         cfn = setup_amazon('CloudFormation::Client', @aws_config, @region)  
         cfn.method(method).call(opts)
