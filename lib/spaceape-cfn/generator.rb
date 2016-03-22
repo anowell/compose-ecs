@@ -28,6 +28,7 @@ module Spaceape
       end
 
       def parsed_config
+        @parsed_config ||= lambda {
         # Merge attributes, assumes config_files is in order of least-specific --> most-specific
         attr = YAML.load(File.open(config_files.first))
         config_files[1..-1].each do |f|
@@ -37,6 +38,7 @@ module Spaceape
         # Now expand any macros present in the config (e.g. __VPC__ )
         expander = Spaceape::Cloudformation::ConfigExpander.new(attr, { :region => @region } )
         return expander.expand 
+        }.call
       end
 
       def generate( opts = {} )
