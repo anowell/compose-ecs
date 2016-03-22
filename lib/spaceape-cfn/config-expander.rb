@@ -54,7 +54,7 @@ module Spaceape
         raise "__LAUNCHCONFIG__ requires at least one policy." unless @config_hash["POLICIES"]
         genned_policies = []
         policy_tmpl = %Q[
-       Resource("RolePolicies") {
+       Resource("<%= resource_name %>") {
        Type "AWS::IAM::Policy"
        Property("PolicyName", "<%= name %>")
        Property("PolicyDocument", { "Statement" => {
@@ -76,6 +76,7 @@ module Spaceape
   ]
         @config_hash["POLICIES"].each do |p|
           name = p
+          resource_name = p.split(/_/).map { |x| x.capitalize }.join + "IAMPolicy"
           policy_conf = YAML.load(File.read(File.join(@policy_dir, "#{p}.yml")))
           resource = policy_conf["RESOURCE"]
           effect = policy_conf["EFFECT"]
