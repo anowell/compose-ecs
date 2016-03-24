@@ -30,6 +30,8 @@ This will return the text of the full ECS Task Definition - volumes and family a
 
 ## Supported Docker Compose Features
 
+ComposeECS currently only supports a subset of the intersection of Docker Compose and ECS Task Definition functionality. We expect this to reach 100% coverage before `v1.0.0`.
+
 | Docker Compose Attribute | Task Definition Attribute | Supported Syntax  | Example                                                      |
 |--------------------------|---------------------------|-------------------|--------------------------------------------------------------|
 | image                    | image                     | String            | `"redis"`                                                    |
@@ -42,3 +44,7 @@ This will return the text of the full ECS Task Definition - volumes and family a
 | volumes_from             | volumesFrom               | String            | `"myContainer"`                                              |
 | environment              | environment               | YAML KV[String]   | `MYVAR: "AVAR"` (Note: ECS does not allow _'s in the key)    |
 | links                    | links                     | YAML Array[String]| `- "myContainer"`                                                |
+
+## Contributing
+
+If you'd like to contribute to this project, please raise an issue and indicate that you'd like to take on the work prior to submitting a pull request. Only pull requests with matching issues that explain the motivation behind the change and at least some test coverage will be considered for integration.
