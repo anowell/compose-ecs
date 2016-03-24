@@ -67,11 +67,11 @@ class ECSContainerDefinition
     return if port_map.nil?
 
     ecs_mapping = []
-    protocol = "tcp"
 
     port_map = port_map.map{ |pm| pm.split(":") if !pm.nil? }
 
     port_map.each do |mapping|
+      protocol = "tcp"
       if mapping[mapping.size - 1].include?("/udp")
         mapping[mapping.size - 1] = mapping[mapping.size - 1].split('/').first
         protocol = "udp"

@@ -1,6 +1,8 @@
+require 'lib/compose-ecs/version.rb'
+
 Gem::Specification.new do |s|
   s.name        = 'compose-ecs'
-  s.version     = '0.0.11'
+  s.version     = ComposeECS::VERSION
   s.date        = '2015-12-07'
   s.summary     = "A bridge between docker-compose and AWS ECS Task Definitions"
   s.description = "A bridge between docker-compose and AWS ECS Task Definitions"
@@ -8,8 +10,7 @@ Gem::Specification.new do |s|
   s.email       = 'joshua@spaceapegames.com'
   s.files       = `git ls-files`.split($/)
   s.require_paths = ["lib"]
-  s.homepage    =
-    'http://rubygems.org/gems/ecs-compose'
+  s.homepage    = 'https://github.com/spaceapegames/compose-ecs'
   s.license       = 'MIT'
 
   s.add_development_dependency 'rake', '~> 10.5.0'

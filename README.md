@@ -27,3 +27,18 @@ The CLI tool allows you to convert Docker Compose definitions to ECS Task defini
 `ecs-compose convert <task_family> <compose_file_path>`
 
 This will return the text of the full ECS Task Definition - volumes and family attribute included.
+
+## Supported Docker Compose Features
+
+| Docker Compose Attribute | Task Definition Attribute | Supported Syntax  | Example                                                      |
+|--------------------------|---------------------------|-------------------|--------------------------------------------------------------|
+| image                    | image                     | String            | "redis"                                                      |
+| hostname                 | hostname                  | String            | "myHost"                                                     |
+| mem_limit                | memory                    | String            | "100m" or "10g"                                              |
+| command                  | command                   | String or Array   | "redis-server -p 6379" or ["redis-server", "-p"..]           |
+| ports                    | portMappings              | YAML Array[String]| "8080:8080", "8080:8080/udp", "8080"                         |
+| labels                   | dockerLabels              | YAML KV[String]   | MYLBL: "ALBL" (Note: ECS does not allow _'s in the key)      |
+| dns                      | dnsServers                | YAML Array[String]| "127.0.0.1"                                                  |
+| volumes_from             | volumesFrom               | String            | "myContainer"                                                |
+| environment              | environment               | YAML KV[String]   | MYVAR: "AVAR" (Note: ECS does not allow _'s in the key)      |
+| links                    | links                     | YAML Array[String]| "myContainer"                                                |
