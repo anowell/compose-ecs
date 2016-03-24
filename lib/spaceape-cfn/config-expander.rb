@@ -34,6 +34,10 @@ module Spaceape
         return @config_hash
       end
 
+      def spot_bid
+        @shared_config["SPOT_BID"][@config_hash["INSTANCE_TYPE"]]
+      end
+
       def ami
         @shared_config["AMI"][@config_hash["AMI_PROFILE"]][@region]
       end
