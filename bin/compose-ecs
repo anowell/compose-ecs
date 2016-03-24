@@ -4,12 +4,12 @@ require 'gli'
 
 include GLI::App
 
-program_desc "Convert Docker Compose files into AWS ECS Task Definitons"
+program_desc 'Convert Docker Compose files into AWS ECS Task Definitons'
 
-desc "Convert Docker Compose files into AWS ECS Task Definitons"
-long_desc %{Convert Docker Compose files into AWS ECS Task Definitons. Usage: compose-ecs convert <family> <compose_file_path>}
+desc 'Convert Docker Compose files into AWS ECS Task Definitons'
+long_desc %(Convert Docker Compose files into AWS ECS Task Definitons. Usage: compose-ecs convert <family> <compose_file_path>)
 command :convert do |c|
-  c.action do |globals, options, args|
+  c.action do |_globals, _options, args|
     help_now!("Wrong number of arguments for convert, expecting 'convert <family> <compose_file_path>'") if args.length != 2
 
     family = args[0]

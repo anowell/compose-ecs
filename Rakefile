@@ -1,6 +1,6 @@
 require 'rake/testtask'
 
-task :default => :test
+task default: :test
 
 task :test do
   sh 'bundle exec rspec'
@@ -14,5 +14,5 @@ task :install do
 end
 
 task :release do
-  sh 'gem release'  
+  sh 'gem release'
 end
