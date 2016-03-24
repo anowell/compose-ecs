@@ -50,6 +50,7 @@ describe Spaceape::Cloudformation::Uploader do
     end
 
     it 'should initialize itself with a different region if provided' do
+      %x[mkdir myService/myEnv/myRegion && echo {} > myService/myEnv/myRegion/myService.json]
       @uploader = Spaceape::Cloudformation::Uploader.new("myService", "myEnv", "myRegion")
       @uploader.region.equal?("myRegion")
     end

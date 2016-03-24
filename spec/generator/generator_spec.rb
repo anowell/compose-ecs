@@ -8,7 +8,7 @@ describe Spaceape::Cloudformation::Generator do
   end
 
   after(:each) do
-    %x[rm -rf myService 2>/dev/null]
+    %x[rm -rf myService shared-config.yml 2>/dev/null]
   end
 
   describe 'initialize' do
@@ -77,6 +77,7 @@ describe Spaceape::Cloudformation::Generator do
       expect(File).to receive(:exists?).once.ordered.with(File.join(Spaceape::Cloudformation::Base::SKEL_DIRECTORY, "us-east-1", "footer.tmpl")).and_return(true)
       expect(File).to receive(:exists?).once.ordered.with("myService/config.yml")
       expect(File).to receive(:exists?).once.ordered.with("myService/myEnv/myEnv.yml")
+      expect(File).to receive(:exists?).once.ordered.with("myService/config-helper.rb")
       @generator.scaffold
     end
 
@@ -85,14 +86,22 @@ describe Spaceape::Cloudformation::Generator do
   end
 
   describe 'generate' do
-    it 'should generate a json file in the correct place' do
+    it 'should raise an error if shared-config does not exist' do
       @buf = StringIO.new()
       %x[ mkdir -p myService/myEnv && touch myService/myService.cfndsl && touch myService/config.yml && touch myService/myEnv/myEnv.yml ]
       %x[ touch myService/config-helper.rb ]
+      expect{@generator.generate}.to raise_error(RuntimeError)
+    end
+
+    it 'should generate a json file in the correct place' do
+      @buf = StringIO.new()
+      %x[ mkdir -p myService/myEnv && touch myService/myService.cfndsl && touch myService/config.yml && touch myService/myEnv/myEnv.yml ]
+      %x[ touch myService/config-helper.rb shared-config.yml ]
       allow(File).to receive(:open).with("/tmp/.myService.attrs.tmp").and_yield(@buf)
       allow(@generator).to receive(:parsed_config).and_return(Hash.new)
       allow(@generator).to receive(:shell_out).and_return("")
       expect(File).to receive(:open).once.ordered.with("/tmp/.myService.json.attrs.tmp", "w")
+      expect(File).to receive(:open).once.ordered.with("/tmp/.myService.json.tmp.erb", "w")
       expect(File).to receive(:open).with("/tmp/.myService.json.tmp", "r").and_return(@buf)
       allow(JSON).to receive(:parse).and_return(Array.new)
       expect(File).to receive(:open).once.ordered.with("myService/myEnv/myService.json", "w").and_return(@buf)
