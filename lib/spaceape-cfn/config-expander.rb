@@ -4,7 +4,7 @@ require 'erb'
 module Spaceape
   module Cloudformation
     class ConfigExpander
-      MACRO_REGEX = %r{__(\w+)__}
+      MACRO_REGEX = %r{^__(\w+)__$}
       LAUNCHCONFIG_CFNDSL = "./launchconfig.cfndsl"
 
       def initialize(config_hash, opts = {})
@@ -23,7 +23,7 @@ module Spaceape
       # value from the shared config file
       def expand
         @config_hash.each_pair do |k,v|
-          next unless v.class == String and v.match(MACRO_REGEX)
+          next unless String(v).match(MACRO_REGEX)
           makro = $1
           if self.respond_to?(makro.downcase)
             @config_hash[k] = self.send(makro.downcase)
