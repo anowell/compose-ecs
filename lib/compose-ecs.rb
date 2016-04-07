@@ -114,7 +114,7 @@ class ECSContainerDefinition
 
   def compose_dns(dns)
     return if dns.nil?
-    fail 'dns must be of type Array' if hostname.class != Array
+    fail 'dns must be of type Array' if dns.class != Array
 
     @definition['dnsServers'] = dns
   end
