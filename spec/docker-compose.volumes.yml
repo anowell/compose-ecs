@@ -5,7 +5,7 @@ db:
    - "3306:3306"
   volumes:
     - /home/mysql:/var/lib/mysql
-    - /home/mysql:/var/lib/db
+    - /home/mysql:/var/lib/db:ro
   environment:
     MYSQL_ROOT_PASSWORD: password
 redis:

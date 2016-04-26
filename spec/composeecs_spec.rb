@@ -54,6 +54,19 @@ describe ComposeECS do
       expect(JSON.parse(@compose.volumes).size).to eq(1)
       expect(JSON.parse(@compose.volumes).class).to equal(Array)
     end
+
+    it 'should not set readOnly to true on a mount point' do
+      expect(@compose.to_hash.first['containerDefinitions']
+      .find { |c| c['name'] == 'db' }['mountPoints']
+      .find { |m| m['containerPath'] == '/var/lib/mysql' }).to_not have_key('readOnly')
+    end
+
+    it 'should set readOnly to true on a mount point if specified' do
+      expect(@compose.to_hash.first['containerDefinitions']
+      .find { |c| c['name'] == 'db' }['mountPoints']
+      .find { |m| m['containerPath'] == '/var/lib/db' }['readOnly']).to be true 
+    end
+
   end
 
   context 'while parsing a valid docker-compose definition without volumes' do

@@ -12,7 +12,6 @@ class ECSDefinition
 
   def build
     output = { 'family' => @family, 'containerDefinitions' => [] }
-
     @container_definitions.each do |container|
       output['containerDefinitions'] << container.definition
     end
@@ -33,10 +32,13 @@ class ECSDefinition
       end
 
       # Map the ECS volume to the mount point in the container definition
+      mount_point = { 'sourceVolume' => volume_name, 'containerPath' => volume.mount }
+      mount_point['readOnly'] = true if volume.ro?
+
       if output['containerDefinitions'].find { |c| c['name'] == volume.container }.keys.include? 'mountPoints'
-        output['containerDefinitions'].find { |c| c['name'] == volume.container }['mountPoints'] << { 'sourceVolume' => volume_name, 'containerPath' => volume.mount }
+        output['containerDefinitions'].find { |c| c['name'] == volume.container }['mountPoints'] << mount_point 
       else
-        output['containerDefinitions'].find { |c| c['name'] == volume.container }['mountPoints'] = [{ 'sourceVolume' => volume_name, 'containerPath' => volume.mount }]
+        output['containerDefinitions'].find { |c| c['name'] == volume.container }['mountPoints'] = [ mount_point ]
       end
     end
 
@@ -167,10 +169,13 @@ class ECSContainerDefinition
 end
 
 class ECSVolumeDefinition
-  attr_accessor :source, :mount, :container
+  attr_accessor :source, :mount, :container, :mode
 
   def initialize(volume_string, container)
     volume_arr = volume_string.split(':')
+    if volume_arr.last =~ /r[o,w]/
+      @mode = volume_arr.pop
+    end
 
     case volume_arr.size
     when 1
@@ -184,6 +189,10 @@ class ECSVolumeDefinition
     end
 
     @container = container
+  end
+
+  def ro?
+    @mode == "ro"
   end
 end
 
