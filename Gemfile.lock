@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    compose-ecs (0.0.11)
+    compose-ecs (0.0.13)
       gli (~> 2.13.2)
       json (~> 1.8.3)
 
