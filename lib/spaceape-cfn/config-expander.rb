@@ -46,6 +46,11 @@ module Spaceape
         File.read(@config_hash["USER_DATA_PATH"])
       end
 
+      # Pull in the per-environment SSL certificate
+      def ssl_cert
+        @shared_config["SSL_CERT"][@config_hash["ENVIRONMENT"]][@region]
+      end
+
       def launchconfig
         tmpl = File.read(@lc_cfndsl)
         tmpl += gen_iam_policies
