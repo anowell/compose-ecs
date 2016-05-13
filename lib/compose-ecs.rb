@@ -36,7 +36,7 @@ class ECSDefinition
       mount_point['readOnly'] = true if volume.ro?
 
       if output['containerDefinitions'].find { |c| c['name'] == volume.container }.keys.include? 'mountPoints'
-        output['containerDefinitions'].find { |c| c['name'] == volume.container }['mountPoints'] << mount_point 
+        output['containerDefinitions'].find { |c| c['name'] == volume.container }['mountPoints'] << mount_point
       else
         output['containerDefinitions'].find { |c| c['name'] == volume.container }['mountPoints'] = [ mount_point ]
       end
@@ -112,6 +112,12 @@ class ECSContainerDefinition
     fail 'Label values must be of type String' unless labels.keys.select { |v| v.class != String }.empty?
 
     @definition['dockerLabels'] = labels
+  end
+
+  def compose_privileged(privileged)
+    fail "privileged must be boolean" unless privileged.instance_of? TrueClass or privileged.instance_of? FalseClass
+
+    @definition['privileged'] = privileged
   end
 
   def compose_dns(dns)
@@ -218,6 +224,7 @@ class ComposeECS
       ecs_container_def.compose_volumesfrom(container_data['volumes_from'])
       ecs_container_def.compose_environment(container_data['environment'])
       ecs_container_def.compose_links(container_data['links'])
+      ecs_container_def.compose_privileged(container_data['privileged'])
 
       ecs_def.container_definitions << ecs_container_def
 
