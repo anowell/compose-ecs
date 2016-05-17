@@ -64,7 +64,7 @@ describe ComposeECS do
     it 'should set readOnly to true on a mount point if specified' do
       expect(@compose.to_hash.first['containerDefinitions']
       .find { |c| c['name'] == 'db' }['mountPoints']
-      .find { |m| m['containerPath'] == '/var/lib/db' }['readOnly']).to be true 
+      .find { |m| m['containerPath'] == '/var/lib/db' }['readOnly']).to be true
     end
 
   end
