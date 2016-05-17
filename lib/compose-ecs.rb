@@ -115,6 +115,7 @@ class ECSContainerDefinition
   end
 
   def compose_privileged(privileged)
+    return if privileged.nil?
     fail "privileged must be boolean" unless privileged.instance_of? TrueClass or privileged.instance_of? FalseClass
 
     @definition['privileged'] = privileged
