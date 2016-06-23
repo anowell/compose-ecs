@@ -173,6 +173,25 @@ class ECSContainerDefinition
 
     @definition['image'] = image
   end
+
+  def compose_logging(logging)
+    return if logging.nil?
+    @definition['logConfiguration'] = {}.tap do |l|
+      l['logDriver'] = logging.fetch('driver') { fail "Missing logging driver." }
+      l['options'] = logging['options']
+    end
+  end
+
+  def compose_logging_v1(log_driver, log_opts)
+    if log_driver.nil?
+      fail "log_opts makes no sense without log_driver" unless log_opts.nil?
+      return
+    end
+
+    compose_logging({ 'driver' => log_driver,
+                      'options' => log_opts || {}}) 
+    
+  end
 end
 
 class ECSVolumeDefinition
@@ -226,6 +245,9 @@ class ComposeECS
       ecs_container_def.compose_environment(container_data['environment'])
       ecs_container_def.compose_links(container_data['links'])
       ecs_container_def.compose_privileged(container_data['privileged'])
+      ecs_container_def.compose_logging(container_data['logging'])
+      # Support Version 1 docker-compose files:
+      ecs_container_def.compose_logging_v1(container_data['log_driver'], container_data['log_opt'])
 
       ecs_def.container_definitions << ecs_container_def
 
