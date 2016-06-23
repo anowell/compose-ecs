@@ -36,6 +36,16 @@ describe ComposeECS do
       expect(JSON.parse(@compose.volumes)).to eq([{ 'name' => 'test-volume-0', 'host' => { 'sourcePath' => '/home/mysql' } }])
     end
 
+    it 'parses logging driver config in docker-compose format' do
+      expect(@compose.to_hash.first['containerDefinitions'].find { |c| c['name'] == 'app' }['logConfiguration'])
+      .to eq( 'logDriver' => 'fluentd', 'options' => { 'fluentd-address' => 'localhost:24224' } )
+    end
+
+    it 'parses logging driver config in docker-compose v1 format' do
+      expect(@compose.to_hash.first['containerDefinitions'].find { |c| c['name'] == 'db' }['logConfiguration'])
+      .to eq( 'logDriver' => 'fluentd', 'options' => { 'fluentd-address' => 'localhost:24224' } )
+    end
+
     it 'does not duplicate ECS volume definitions if multiple container volumes reference the same ECS volume' do
       expect(JSON.parse(@compose.volumes).size).to eq(1)
     end
@@ -66,6 +76,7 @@ describe ComposeECS do
       .find { |c| c['name'] == 'db' }['mountPoints']
       .find { |m| m['containerPath'] == '/var/lib/db' }['readOnly']).to be true
     end
+
 
   end
 
