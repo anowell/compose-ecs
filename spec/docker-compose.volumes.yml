@@ -1,6 +1,9 @@
 db:
   mem_limit: 1024m
   image: mysql
+  log_driver: fluentd
+  log_opt:
+    fluentd-address: localhost:24224
   ports:
    - "3306:3306"
   volumes:
@@ -23,6 +26,10 @@ app:
   mem_limit: 2g
   image: testapp
   command: "testapp -v debug"
+  logging:
+    driver: fluentd
+    options:
+      fluentd-address: localhost:24224
   ports:
     - "3000:3000"
     - "3000:3000/udp"
