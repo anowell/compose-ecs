@@ -1,4 +1,4 @@
-# compose-ecs [![Build Status](https://travis-ci.org/spaceapegames/compose-ecs.svg?token=PLVFspnXYyAs4yV7xzCM&branch=master)](https://travis-ci.com/spaceapegames/compose-ecs)
+# compose-ecs [![Build Status](https://api.travis-ci.org/spaceapegames/compose-ecs.svg?branch=master)](https://travis-ci.org/spaceapegames/compose-ecs)
 Convert Docker Compose files into AWS ECS Task Definitions
 
 
