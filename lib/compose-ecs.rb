@@ -92,7 +92,8 @@ class ECSContainerDefinition
     ecs_environment = []
 
     environment_map.each_pair do |k, v|
-      ecs_environment << { 'name' => k, 'value' => v.to_s }
+      value = v.nil? ? ENV[k] : v
+      ecs_environment << { 'name' => k, 'value' => value.to_s }
     end
 
     @definition['environment'] = ecs_environment
@@ -189,8 +190,8 @@ class ECSContainerDefinition
     end
 
     compose_logging({ 'driver' => log_driver,
-                      'options' => log_opts || {}}) 
-    
+                      'options' => log_opts || {}})
+
   end
 end
 
